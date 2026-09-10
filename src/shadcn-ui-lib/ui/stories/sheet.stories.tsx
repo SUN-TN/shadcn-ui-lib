@@ -8,8 +8,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet';
-import { Button } from '../ui/button';
+} from '../sheet';
+import { Button } from '../button';
 
 const meta = {
   title: 'Components/Sheet',

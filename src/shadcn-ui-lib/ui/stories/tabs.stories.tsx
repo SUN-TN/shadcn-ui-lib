@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs';
+import { Input } from '../input';
+import { Button } from '../button';
 
 const meta = {
   title: 'Components/Tabs',

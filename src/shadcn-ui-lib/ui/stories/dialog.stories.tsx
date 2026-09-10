@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
+} from '../dialog';
+import { Button } from '../button';
 
 const meta = {
   title: 'Components/Dialog',
