@@ -1,11 +1,11 @@
 # shadcn-ui-lib
 
-基于 **React 19 + Vite 8 + TypeScript 7 + Tailwind CSS v4 + shadcn/ui + Storybook 10** 的组件库脚手架。
+基于 **React 19 + Vite 8 + TypeScript 6 + Tailwind CSS v4 + shadcn/ui + Storybook 10** 的组件库脚手架。
 
 ## 技术栈
 
 - **构建**: Vite 8 + `@vitejs/plugin-react` v6（底层 OXC）
-- **语言**: TypeScript 7（启用 `erasableSyntaxOnly`）
+- **语言**: TypeScript 6（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）
 - **样式**: Tailwind CSS v4（CSS-first，通过 `@tailwindcss/vite`）
 - **UI**: shadcn/ui（按需 `pnpm dlx shadcn@latest add <name>` 拉取源码）
 - **演示**: Storybook 10 + `@storybook/react-vite`
@@ -19,16 +19,21 @@
 
 ```
 src/
+├── shadcn-ui-lib/
+│   └── ui/                   # shadcn-ui-lib 组件（10 件套）
+│       ├── button.tsx
+│       ├── input.tsx
+│       └── ...
 ├── components/
-│   ├── ui/                # shadcn 组件（10 件套）
-│   ├── theme/             # next-themes 包装
-│   └── stories/           # 每个组件的 Storybook story
+│   ├── theme/                # next-themes 包装
+│   └── stories/             # 每个组件的 Storybook story
 ├── lib/
-│   └── utils.ts           # cn() 等
+│   └── utils.ts             # cn() 等
 ├── App.tsx
 ├── main.tsx
-└── index.css              # Tailwind v4 入口 + 主题变量
-.storybook/                # Storybook 配置
+└── index.css               # Tailwind v4 入口 + 主题变量
+registry/                     # Registry JSON（发布源）
+.storybook/                  # Storybook 配置
 ```
 
 ## 命令
@@ -49,25 +54,9 @@ src/
 pnpm dlx shadcn@latest add <component-name>
 ```
 
-shadcn CLI 会把组件源码写到 `src/components/ui/<name>.tsx`，并自动安装依赖。导入路径已统一为 `@/lib/utils`。
+shadcn CLI 会把组件源码写到 `src/shadcn-ui-lib/ui/<name>.tsx`，并自动安装依赖。导入路径已统一为 `@/lib/utils`。
 
-随后在 `src/components/stories/` 下新建 `<name>.stories.tsx`：
-
-```tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import { MyComponent } from '../ui/my-component';
-
-const meta = {
-  title: 'Components/MyComponent',
-  component: MyComponent,
-  tags: ['autodocs'],
-} satisfies Meta<typeof MyComponent>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-export const Default: Story = { args: { /* ... */ } };
-```
+随后在 `src/shadcn-ui-lib/stories/` 下新建 `<name>.stories.tsx`。
 
 ## 主题
 
@@ -77,16 +66,82 @@ export const Default: Story = { args: { /* ... */ } };
 
 ## Changesets
 
-修改完成后：
-
 ```bash
 pnpm changeset          # 选择 bump 类型并写说明
-pnpm version-packages   # 更新 package.json 与 CHANGELOG.md
-pnpm release            # 发布到 npm（需先去掉 package.json 中的 private）
+pnpm version-packages # 更新 package.json 与 CHANGELOG.md
+pnpm release          # 发布到 npm（需先去掉 package.json 中的 private）
 ```
+
+---
+
+## 发布为 Registry（供其他项目使用）
+
+### 目录隔离策略
+
+| Registry 命名空间 | `aliases.ui` | 实际安装目录 |
+|---|---|---|
+| `@shadcn`（默认） | `@/components/ui` | `src/components/ui/` |
+| `@shadcn-ui-lib` | `@/shadcn-ui-lib/ui` | `src/shadcn-ui-lib/ui/` |
+
+两套组件完全共存，互不覆盖。
+
+### Registry JSON
+
+`registry/` 目录下每个组件对应一个 JSON 文件（由 `scripts/generate-registry.js` 从源码自动生成），符合 shadcn/ui registry-item 规范。
+
+### 用户接入方式
+
+在用户项目中添加本 registry：
+
+```bash
+shadcn registry add @shadcn-ui-lib=https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/{name}.json
+```
+
+这会在用户项目的 `components.json` 中写入：
+
+```json
+{
+  "registries": {
+    "@shadcn": "https://ui.shadcn.com/r/styles/{style}/{name}.json",
+    "@shadcn-ui-lib": "https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/{name}.json"
+  }
+}
+```
+
+然后安装组件：
+
+```bash
+# 从默认 shadcn 安装 → src/components/ui/button.tsx
+shadcn add button
+
+# 从本 registry 安装 → src/shadcn-ui-lib/ui/button.tsx
+shadcn add @shadcn-ui-lib/button
+```
+
+导入方式：
+
+```tsx
+// 默认 shadcn
+import { Button } from '@/components/ui/button';
+
+// 本库
+import { Button } from '@/shadcn-ui-lib/ui/button';
+```
+
+### Registry JSON 生成脚本
+
+当组件源码更新后，需重新生成 `registry/*.json`：
+
+```bash
+node scripts/generate-registry.js
+```
+
+### 生产环境 Registry 托管
+
+GitHub Raw CDN 访问可能不稳定，推荐使用 Vercel / Cloudflare Pages 托管 `registry/` 目录（零成本、自动 HTTPS）。部署后将 `components.json` 中的 registry URL 替换为你的托管地址即可。
 
 ## 已知约束
 
-- TS 7 启用 `erasableSyntaxOnly`，禁止 `enum` / `namespace` / 参数属性。shadcn 生成的组件如有 `enum`，需改写为 `as const` 对象字面量。
-- shadcn CLI 默认装 `cn` 包；本项目已替换为 `@/lib/utils`，并 `pnpm remove cn`。
+- shadcn CLI 默认装的 `cn` 包已替换为 `@/lib/utils`，并 `pnpm remove cn`。
 - 包当前为 `private: true`，`pnpm release` 会拒绝发包；正式发包前改回 `false` 并配置 `files` 字段。
+- Registry JSON 需随组件源码同步维护；使用 `scripts/generate-registry.js` 自动生成。
