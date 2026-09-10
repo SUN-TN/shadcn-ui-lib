@@ -1,7 +1,7 @@
 import type { Preview } from '@storybook/react';
 import '../src/index.css';
 import { ThemeProvider } from '../src/components/theme/theme-provider';
-import { Toaster } from '../src/components/ui/sonner';
+import { Toaster } from '../src/shadcn-ui-lib/ui/sonner';
 import React from 'react';
 
 const preview: Preview = {

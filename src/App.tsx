@@ -1,5 +1,5 @@
 import { ThemeProvider } from './components/theme/theme-provider';
-import { Toaster } from './components/ui/sonner';
+import { Toaster } from './shadcn-ui-lib/ui/sonner';
 
 export default function App() {
   return (
