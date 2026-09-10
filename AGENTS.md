@@ -13,7 +13,7 @@
 | 远程 | `git@github.com:SUN-TN/shadcn-ui-lib.git`（默认分支 `main`，公开） |
 | Runtime | Node ≥ 22 + pnpm 11.10 |
 | 构建 | Vite 8 + `@vitejs/plugin-react@^6`（底层 OXC，**非 SWC、非 Babel**） |
-| 语言 | TypeScript 6（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`） |
+| 语言 | **TypeScript `^6.0.3`**（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）——见下方"为什么用 v6 不升 v7" |
 | 样式 | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**没有 `tailwind.config`**） |
 | 演示 | Storybook 10 + `@storybook/react-vite`（仅 `@storybook/addon-a11y`、`@storybook/addon-themes`，**未装 `addon-essentials`**，因 SB10 无对应 v10 发布） |
 | 主题 | `next-themes` + CSS 变量（light/dark/system） |
@@ -98,11 +98,21 @@ shadcn CLI 的路径解析机制：
 
 ## TypeScript / lint 已知约束
 
+### 为什么用 TypeScript v6 不升 v7
+
+`package.json` 锁定 `typescript: ^6.0.3`，**不要**自作主张升 v7。原因：
+
+- `typescript-eslint@8.70`（项目当前用的版本）**暂不支持** TypeScript 7.0
+- 升 v7 会导致 `pnpm lint` 直接抛 `typescript-eslint does not support TS 7.0`（参见 [typescript-eslint/typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)）
+- TS 7 的新特性（如 `erasableSyntaxOnly`）在本项目也用不上——v6 已提供 `strict + verbatimModuleSyntax + noUncheckedIndexedAccess` 等现代严格选项
+- 等待 typescript-eslint 官方跟进后，再单独评估升级；当前**禁止**改 `typescript` 字段版本号
+
+### 其他约束
+
 - `tsconfig.app.json` 启用 `verbatimModuleSyntax`——**禁止**直接用 `React.CSSProperties` 等隐式全局类型，必须 `import type { CSSProperties } from 'react'` 后写 `as CSSProperties`（`sonner.tsx` 已踩过这个坑）
 - 不要在 `dependencies` 数组里加 `react` / `react-dom`——脚本有 `KNOWN_PEERS` 过滤
 - `package.json` 是 `"type": "module"`——CommonJS 脚本必须 `.cjs` 后缀
 - `@vitejs/plugin-react@^6` 底层是 OXC，**不要**加 `@vitejs/plugin-react-swc`、`@vitejs/plugin-react-oxc` 等
-- TypeScript 6 + typescript-eslint@8.70；TS7 暂未兼容 typescript-eslint
 - Storybook v10 不再提供 `addon-essentials` v10 兼容版——只能单独装 a11y/themes
 
 ---

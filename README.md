@@ -5,7 +5,7 @@
 ## 技术栈
 
 - **构建**: Vite 8 + `@vitejs/plugin-react` v6（底层 OXC）
-- **语言**: TypeScript 6（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）
+- **语言**: TypeScript `^6.0.3`（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）—— 当前用 v6 不升 v7 是因为 `typescript-eslint@8.70` 暂未兼容 TS 7.0（见 [issue 10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)）；待官方跟进后再单独评估升级。详见 [AGENTS.md](./AGENTS.md)。
 - **样式**: Tailwind CSS v4（CSS-first，通过 `@tailwindcss/vite`）
 - **UI**: shadcn/ui（按需 `pnpm dlx shadcn@latest add <name>` 拉取源码）
 - **演示**: Storybook 10 + `@storybook/react-vite`
