@@ -4,6 +4,11 @@
   "homepage": "https://github.com/SUN-TN/shadcn-ui-lib",
   "items": [
     {
+      "name": "utils",
+      "title": "cn utility",
+      "description": "Class name merge utility (clsx + tailwind-merge)."
+    },
+    {
       "name": "avatar",
       "title": "Avatar",
       "description": "An image element with a fallback for loading and error states."
