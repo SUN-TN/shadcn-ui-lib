@@ -14,6 +14,8 @@ storybook-static
 *.njsproj
 *.sln
 *.sw?
+.zcode
+.codebuddy
 
 # Logs
 logs
