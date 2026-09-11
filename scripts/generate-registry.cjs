@@ -127,7 +127,7 @@ const utilsItem = {
   author: 'SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)',
   title: 'cn utility',
   description: 'Class name merge utility (clsx + tailwind-merge).',
-  dependencies: ['clsx', 'tailwind-merge'],
+  dependencies: ['cn'],
   registryDependencies: [],
   files: [
     {
@@ -141,7 +141,7 @@ const utilsItem = {
 };
 fs.writeFileSync(path.join(outDir, 'utils.json'), JSON.stringify(utilsItem, null, 2));
 items.unshift({ name: 'utils', title: 'cn utility', description: utilsItem.description });
-console.log(`✓ utils.json  (deps: clsx, tailwind-merge)`);
+console.log(`✓ utils.json  (deps: cn)`);
 
 // ---- index.json ----
 const index = {
