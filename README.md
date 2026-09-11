@@ -28,7 +28,7 @@ src/
 ├── components/
 │   └── theme/               # next-themes 包装
 ├── lib/
-│   └── utils.ts             # cn() 工具
+│   └── utils.ts             # re-exports `cn` from the `cn` package
 ├── App.tsx
 ├── main.tsx
 └── index.css               # Tailwind v4 入口 + 主题变量
@@ -76,6 +76,19 @@ pnpm changeset          # 选择 bump 类型并写说明
 pnpm version-packages   # 更新 package.json 与 CHANGELOG.md
 pnpm release            # 发布到 npm（需先去掉 package.json 中的 private）
 ```
+
+---
+
+## cn 库迁移
+
+本项目使用 [`cn`](https://www.npmjs.com/package/cn) 作为唯一的 Tailwind 类合并与冲突解析库，**取代** `clsx` + `tailwind-merge`。
+
+- `cn` 提供与 `tailwind-merge` / `clsx` 完全兼容的 API（同一套 `cn()` 调用形态）
+- 性能约为后两者的 **30 倍**
+- `src/lib/utils.ts` 简化为：`export { cn } from "cn";`
+- `registry/utils.json` 的 `dependencies` 仅声明 `"cn"`；用户安装 `@shadcn-ui-lib/<name>` 时 CLI 会自动 `pnpm add cn`
+- 已通过官方迁移命令完成：`pnpm dlx shadcn@latest migrate cn`
+- 不要再额外安装 `clsx` 或 `tailwind-merge`
 
 ---
 
@@ -129,7 +142,7 @@ shadcn add @shadcn-ui-lib/dialog
 # CLI 会自动：
 #   - 拉 dialog.json + button.json（registryDependencies）
 #   - 拉 utils.json（registryDependencies）
-#   - 安装 npm 依赖：radix-ui、lucide-react、clsx、tailwind-merge、class-variance-authority
+#   - 安装 npm 依赖：radix-ui、lucide-react、cn、class-variance-authority
 #   - 写入 <aliases.ui>/shadcn-ui-lib/{button,dialog}.tsx + <aliases.lib>/utils.ts
 ```
 
@@ -169,5 +182,5 @@ GitHub Raw CDN 访问可能不稳定，推荐使用 Vercel / Cloudflare Pages �
 ## 已知约束
 
 - 包当前为 `private: true`，`pnpm release` 会拒绝发包；正式发包前改回 `false` 并配置 `files` 字段。
-- shadcn CLI 默认装的 `cn` 包已替换为 `@/lib/utils`，并 `pnpm remove cn`。
+- 通过 `pnpm dlx shadcn@latest migrate cn` 已迁移到 [cn](https://www.npmjs.com/package/cn) 库（取代 `clsx` + `tailwind-merge`；API 兼容、性能 30×）；`src/lib/utils.ts` 现仅 `export { cn } from "cn";`。详见下方「cn 库迁移」。
 - Registry JSON 由脚本从源码自动生成；修改组件后必须跑 `node scripts/generate-registry.cjs`（CI 也会校验）。

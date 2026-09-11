@@ -30,7 +30,7 @@ src/
 │   └── ui/                  # 组件源码（registry 内容来源）
 │       └── stories/         # Storybook stories 与组件同级
 ├── components/theme/        # next-themes 包装
-├── lib/utils.ts             # cn() 工具（registry:lib 项的源）
+├── lib/utils.ts             # re-exports `cn` from the `cn` package (registry:lib source)
 ├── App.tsx, main.tsx
 └── index.css               # Tailwind v4 主题变量
 registry/                    # 发布用的 JSON（脚本生成，**勿手动编辑**）
@@ -63,7 +63,7 @@ scripts/generate-registry.cjs
 ## 组件开发流程
 
 1. 通过 shadcn CLI 添加：`pnpm dlx shadcn@latest add <name>`——CLI 会写入 `src/shadcn-ui-lib/ui/<name>.tsx`，**不要**用 `src/components/ui/`（与本项目无关）
-2. shadcn CLI 默认会加 `import { cn } from "cn"`——**必须** sed 替换为 `import { cn } from "@/lib/utils"`，并 `pnpm remove cn`
+2. shadcn CLI 默认会加 `import { cn } from "cn"`——保留即可（**不要再 sed 替换**为本地 `@/lib/utils`）。`cn` 包取代了 `clsx` + `tailwind-merge`，是当前 cn 生态默认选项
 3. 在 `src/shadcn-ui-lib/ui/stories/<name>.stories.tsx` 写 Storybook story
 4. `node scripts/generate-registry.cjs` 同步 registry JSON
 5. 写 changeset：`pnpm changeset`
@@ -83,6 +83,15 @@ shadcn CLI 的路径解析机制：
 修改 `scripts/generate-registry.cjs` 时务必同步看 `registry/*.json` 的 diff，确保每个组件都生成了正确的 `target`、`dependencies`、`registryDependencies`。
 
 ---
+
+## cn 库（取代 clsx + tailwind-merge）
+
+- 本项目使用 [`cn`](https://www.npmjs.com/package/cn) 作为唯一类合并库
+- 取代 `clsx` + `tailwind-merge`，API 完全兼容，性能 30×
+- `src/lib/utils.ts` 仅 `export { cn } from "cn";`
+- `registry/utils.json` 的 `dependencies: ["cn"]`，用户安装 registry 组件时 CLI 自动 `pnpm add cn`
+- 已通过 `pnpm dlx shadcn@latest migrate cn` 完成迁移；**不要**额外安装 `clsx` 或 `tailwind-merge`
+- shadcn CLI 生成新组件时默认导入的 `from "cn"` 是预期行为，**不要 sed 替换**
 
 ## CI 约束（`.github/workflows/regen-registry.yml`）
 
@@ -125,3 +134,4 @@ shadcn CLI 的路径解析机制：
 - ❌ 直接 commit 不跑 `generate-registry.cjs`（CI 会拦截）
 - ❌ 把 `@vitejs/plugin-react` 降级到 v5（依赖 Storybook 10 与 v6 配套）
 - ❌ 在 `pnpm release` 前去掉 `"private": true`（当前不需要发布 npm 包）
+- ❌ 重新安装 `clsx` 或 `tailwind-merge`——`cn` 已完全替代，registry 也只声明 `cn`
