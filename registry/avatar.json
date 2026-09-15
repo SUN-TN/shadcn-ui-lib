@@ -9,7 +9,8 @@
     "radix-ui"
   ],
   "registryDependencies": [
-    "utils"
+    "https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/utils.json",
+    "https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/theme.json"
   ],
   "files": [
     {

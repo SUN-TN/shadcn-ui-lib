@@ -182,10 +182,10 @@ shadcn add @shadcn-ui-lib/button
 # 安装带依赖的组件（例如 dialog 依赖 button）
 shadcn add @shadcn-ui-lib/dialog
 # CLI 会自动：
-#   - 拉 dialog.json + button.json（registryDependencies）
-#   - 拉 utils.json（registryDependencies）
-#   - 安装 npm 依赖：radix-ui、lucide-react、cn、class-variance-authority
+#   - 拉 dialog.json + button.json + utils.json + theme.json（registryDependencies）
+#   - 安装 npm 依赖：radix-ui、lucide-react、cn、class-variance-authority、tw-animate-css
 #   - 写入 <aliases.ui>/shadcn-ui-lib/{button,dialog}.tsx + <aliases.lib>/utils.ts
+#   - 把色彩 token upsert 到用户项目的 CSS（:root + @theme inline）
 ```
 
 导入方式：
@@ -198,6 +198,50 @@ import { Button } from '@/components/ui/button';
 import { Button } from '@/components/ui/shadcn-ui-lib/button';
 ```
 
+### 色彩 token 自动下发
+
+组件装下去只是"源码到位"，设计规范要生效还得把 `src/index.css` 里的 token 写进用户项目。本仓库把 token 做成了 `registry:theme` 项，**每个 UI 组件的 `registryDependencies` 都带 `theme.json`，所以装任意组件都会自动 upsert token**。
+
+```bash
+# 也可以单独装 / 单独更新 token
+shadcn add @shadcn-ui-lib/theme
+```
+
+CLI 会按 Tailwind v4 管线写入 `components.json` 里 `tailwind.css` 指向的 CSS 文件：
+
+- `cssVars.light` → 写进 `:root`（37 个变量，来自 `src/index.css` 的 `:root`）
+- `css["@theme inline"]` → 逐字写进 `@theme inline`（`--color-*` 映射 + `--radius-*`，40 项）
+- `css["@custom-variant dark"]` → `(&:is(.dark *))`
+
+其余两个 theme 相关项：
+
+| item             | 作用                                                                       | 是否随组件自动安装 |
+| ---------------- | -------------------------------------------------------------------------- | ------------------ |
+| `theme`          | 亮色 token（`:root` + `@theme inline`），`devDependencies: tw-animate-css` | 是                 |
+| `theme-dark`     | 中性暗色基线（`.dark`），**会覆盖用户已有的暗色变量**，故需显式安装        | 否                 |
+| `theme-provider` | `next-themes` 包装，落到 `<aliases.components>/theme/theme-provider.tsx`   | 否                 |
+
+暗色切换：
+
+```bash
+shadcn add @shadcn-ui-lib/theme-provider
+# 需要中性暗色基线再执行：shadcn add @shadcn-ui-lib/theme-dark
+```
+
+```tsx
+import { ThemeProvider } from '@/components/theme/theme-provider';
+
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+  {children}
+</ThemeProvider>;
+```
+
+注意事项：
+
+- **要求用户项目是 Tailwind v4**——v3 项目不会写 `@theme`，token 不生效。
+- `registry:theme` 的 `overwriteCssVars` 为 `true`，安装会**覆盖用户 `:root` 中同名变量**（这正是"自动生效"的开关）。
+- 验收：构建产物里能搜到 `.bg-primary`，且 `--primary` 解析为 `oklch(0.639 0.149 247.984)`（#3091E1）。
+
 ### Registry JSON 结构
 
 `registry/` 目录下每个组件对应一个 JSON 文件，由 `scripts/generate-registry.cjs` 从源码自动生成。每个 item 包含：
@@ -205,7 +249,8 @@ import { Button } from '@/components/ui/shadcn-ui-lib/button';
 - `name` / `type: "registry:ui"` / `files[].content` — 组件源码（CLI 直接写入文件）
 - `files[].target` — 用户项目中的目标路径（用 `@ui/` 占位符解析到 `aliases.ui`）
 - `dependencies` — 由脚本从源码扫描裸 import 提取的 npm 包（react/react-dom 排除）
-- `registryDependencies` — 同 registry 内跨组件依赖（如 `dialog` → `["button", "utils"]`）
+- `registryDependencies` — 同 registry 内跨组件依赖。**一律写成绝对 URL**（如 `dialog` → `.../button.json`、`.../utils.json`、`.../theme.json`）；裸名 `"button"` 会被 CLI 解析成官方 `@shadcn` 的同名组件
+- `devDependencies` — 用到 `animate-in` / `animate-out` 的组件自动带上 `tw-animate-css`
 
 ### Registry JSON 生成与同步
 

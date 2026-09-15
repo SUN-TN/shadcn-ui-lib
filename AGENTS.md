@@ -71,6 +71,34 @@ scripts/generate-registry.cjs
 
 ---
 
+## 色彩 token 的分发（registry:theme）
+
+设计规范不能只停在 `src/index.css`，必须变成可安装的 registry 项，业务项目才会自动用上。
+
+脚本 `generate-registry.cjs` 会解析 `src/index.css` 生成三个项（`src/index.css` 是唯一真源，**不要**手编这几个 JSON）：
+
+- `theme`（`registry:theme`，自动随每个组件安装）
+  - `:root` → `cssVars.light` → CLI 写入业务项目的 `:root`
+  - `@theme inline` → `css["@theme inline"]` → CLI 逐字写入
+  - 附 `@custom-variant dark (&:is(.dark *))` 与 `devDependencies: ["tw-animate-css"]`
+- `theme-dark`（`registry:theme`，按需显式安装）：`.dark` → `cssVars.dark`。**不挂**到组件的 `registryDependencies`——避免业务装个 button 就把自定义暗色冲掉
+- `theme-provider`（`registry:lib`）：`src/components/theme/theme-provider.tsx` → `@components/theme/theme-provider.tsx`
+
+`theme` 被写进每个 UI 组件的 `registryDependencies`，所以 `add @shadcn-ui-lib/<name>` 会自动 upsert token（CLI 对 `registry:theme` 置 `overwriteCssVars: true`，会覆盖业务 `:root` 里的同名变量——这是"自动生效"的开关，也是要在 README 里写明的副作用）。
+
+**改了 `src/index.css` 必须**立刻 `node scripts/generate-registry.cjs` 并 commit `registry/`；CI 已把 `src/index.css`、`src/components/theme/**` 加入 drift check 触发路径。
+
+用 `--color-*` 映射走 `css["@theme inline"]` 而不是 `cssVars.theme`：后者依赖 CLI 对颜色值自动补 `--color-` 前缀的行为（不同版本不一致，可能生成 `--color-color-success`），`css` 段是逐字写入、行为确定。
+
+## 业务项目接入（消费方）
+
+1. 前置：Tailwind v4 + 已 `npx shadcn@latest init` 生成 `components.json`（v3 项目不会写 `@theme`，装了也不生效）
+2. `components.json` 里注册本 registry：
+   `"registries": { "@shadcn-ui-lib": "https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/{name}.json" }`
+3. `npx shadcn@latest add @shadcn-ui-lib/button` → 自动带装 `utils` 与 `theme`
+4. 暗色切换：`npx shadcn@latest add @shadcn-ui-lib/theme-provider`，用 `<ThemeProvider attribute="class">` 包根组件；需要中性暗色基线再 `add @shadcn-ui-lib/theme-dark`
+5. 验收：构建产物里能搜到 `.bg-primary`，且 `--primary` 解析为 `oklch(0.639 0.149 247.984)`（#3091E1）
+
 ## Registry 维护红线（重要）
 
 shadcn CLI 的路径解析机制：
@@ -79,7 +107,9 @@ shadcn CLI 的路径解析机制：
 2. **`shadcn registry add` 不会传染源端 `aliases`** 到用户项目
 3. **真正决定目录的是每个 `files[].target`**——本项目每个 UI 组件都设了 `target: "@ui/shadcn-ui-lib/<name>.tsx"`
 4. **`<name>.tsx` 引用内部组件时**只能用 `@/shadcn-ui-lib/ui/...`（保持与源端一致），`registryDependencies` 由脚本扫描 `@/` 别名自动生成
-5. **utils 必须存在于 `registry/`**——所有 UI 组件的 `registryDependencies` 都包含 `"utils"`，缺失会导致用户项目 `Cannot find module '@/lib/utils'`
+5. **utils 必须存在于 `registry/`**——所有 UI 组件的 `registryDependencies` 都包含 utils 的绝对 URL，缺失会导致用户项目 `Cannot find module '@/lib/utils'`
+6. **同仓库依赖只能写绝对 URL**（脚本里的 `ITEM_URL()`）——裸名会被 CLI 解析成**官方 `@shadcn` 的同名组件**。写 `"button"` 拉到的是官方 button，落点是 `<aliases.ui>/button.tsx`，而组件里 import 的是 `@/shadcn-ui-lib/ui/button`，直接解析失败
+7. **用到 `animate-in` / `animate-out` 的组件**必须带 `devDependencies: ["tw-animate-css"]`（脚本按正则自动加），否则业务项目动画失效
 
 修改 `scripts/generate-registry.cjs` 时务必同步看 `registry/*.json` 的 diff，确保每个组件都生成了正确的 `target`、`dependencies`、`registryDependencies`。
 

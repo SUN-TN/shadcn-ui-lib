@@ -9,8 +9,12 @@
     "lucide-react",
     "radix-ui"
   ],
+  "devDependencies": [
+    "tw-animate-css"
+  ],
   "registryDependencies": [
-    "utils"
+    "https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/utils.json",
+    "https://raw.githubusercontent.com/SUN-TN/shadcn-ui-lib/main/registry/theme.json"
   ],
   "files": [
     {

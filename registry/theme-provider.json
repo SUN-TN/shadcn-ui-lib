@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "theme-provider",
+  "type": "registry:lib",
+  "author": "SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)",
+  "title": "Theme Provider",
+  "description": "next-themes 包装，提供 light / dark / system 切换（默认 attribute=\"class\"）。",
+  "dependencies": [
+    "next-themes"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "theme-provider.tsx",
+      "target": "@components/theme/theme-provider.tsx",
+      "content": "import { ThemeProvider as NextThemesProvider } from 'next-themes';\nimport type { ComponentProps } from 'react';\n\nexport function ThemeProvider(props: ComponentProps<typeof NextThemesProvider>) {\n  return <NextThemesProvider {...props} />;\n}\n",
+      "type": "registry:lib"
+    }
+  ],
+  "categories": [
+    "theme"
+  ],
+  "docs": "https://github.com/SUN-TN/shadcn-ui-lib"
+}

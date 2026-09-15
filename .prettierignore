@@ -1,4 +1,7 @@
 node_modules
+# registry/ 由 scripts/generate-registry.cjs 生成，禁止 prettier 改写：
+# 否则 lint-staged 的 prettier --write 会让落盘格式 ≠ 脚本输出，CI drift check 必然失败
+registry
 dist
 dist-ssr
 storybook-static

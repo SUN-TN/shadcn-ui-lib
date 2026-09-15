@@ -4,6 +4,16 @@
   "homepage": "https://github.com/SUN-TN/shadcn-ui-lib",
   "items": [
     {
+      "name": "theme-provider",
+      "title": "Theme Provider",
+      "description": "next-themes 包装，提供 light / dark / system 切换（默认 attribute=\"class\"）。"
+    },
+    {
+      "name": "theme",
+      "title": "Design Tokens",
+      "description": "UI/UX 颜色设计规范落地到 shadcn 语义 token（OKLCH）：主色蓝 #3091E1、字体灰阶、状态色与 4 个补充 token（success/warning/info/ink）。"
+    },
+    {
       "name": "utils",
       "title": "cn utility",
       "description": "Class name merge utility (clsx + tailwind-merge)."
@@ -57,6 +67,11 @@
       "name": "tabs",
       "title": "Tabs",
       "description": "A set of layered sections of content — known as tab panels."
+    },
+    {
+      "name": "theme-dark",
+      "title": "Dark Baseline",
+      "description": "中性暗色基线（.dark 变量）。设计规范只定义亮色，本项按需单独安装。"
     }
   ]
 }

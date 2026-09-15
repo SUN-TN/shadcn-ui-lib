@@ -6,12 +6,16 @@ on:
     paths:
       - 'src/shadcn-ui-lib/ui/**'
       - 'src/lib/**'
+      - 'src/index.css'
+      - 'src/components/theme/**'
       - 'scripts/generate-registry.cjs'
   pull_request:
     branches: [main]
     paths:
       - 'src/shadcn-ui-lib/ui/**'
       - 'src/lib/**'
+      - 'src/index.css'
+      - 'src/components/theme/**'
       - 'scripts/generate-registry.cjs'
 
 jobs:
