@@ -40,15 +40,15 @@ scripts/                    # registry 生成脚本
 
 ## 命令
 
-| 命令 | 说明 |
-| --- | --- |
-| `pnpm dev` | 启动 Storybook（http://localhost:6006） |
-| `pnpm build-storybook` | 构建 Storybook 静态站点到 `storybook-static/` |
-| `pnpm build` | TypeScript 检查 + Vite 生产构建 |
-| `pnpm typecheck` | 仅类型检查 |
-| `pnpm lint` / `pnpm lint:fix` | ESLint |
-| `pnpm format` | Prettier 全量格式化 |
-| `pnpm changeset` | 新建 changeset |
+| 命令                                 | 说明                                                  |
+| ------------------------------------ | ----------------------------------------------------- |
+| `pnpm dev`                           | 启动 Storybook（http://localhost:6006）               |
+| `pnpm build-storybook`               | 构建 Storybook 静态站点到 `storybook-static/`         |
+| `pnpm build`                         | TypeScript 检查 + Vite 生产构建                       |
+| `pnpm typecheck`                     | 仅类型检查                                            |
+| `pnpm lint` / `pnpm lint:fix`        | ESLint                                                |
+| `pnpm format`                        | Prettier 全量格式化                                   |
+| `pnpm changeset`                     | 新建 changeset                                        |
 | `node scripts/generate-registry.cjs` | 从 `src/shadcn-ui-lib/ui/` 重新生成 `registry/*.json` |
 
 ## 添加新组件
@@ -68,6 +68,48 @@ shadcn CLI 会把组件源码写到 `src/shadcn-ui-lib/ui/<name>.tsx`。导入�
 主题由 `next-themes` 管理（`attribute="class"`，`defaultTheme="system"`），与 Tailwind v4 的 `@custom-variant dark (&:is(.dark *))` 配合。
 
 在 Storybook 中可使用顶部 **Themes** 工具栏切换 light / dark。
+
+## 色彩 token（语义化）
+
+UI/UX 颜色设计规范已全部落在 shadcn 现有语义 token 上（`src/index.css`，OKLCH 格式），**不新增品牌色工具类**；仅补充 4 个 shadcn 缺失的状态/强调 token：`--success`、`--warning`、`--info`、`--ink`。
+
+### 设计规范 → 语义 token 映射（亮色 `:root`）
+
+| 设计规范           | 语义 token                                                                    | 值（oklch）                     |
+| ------------------ | ----------------------------------------------------------------------------- | ------------------------------- |
+| 主色·蓝 `#3091E1`  | `--primary` / `--ring` / `--sidebar-primary` / `--sidebar-ring` / `--chart-1` | `oklch(0.639 0.149 247.984)`    |
+| 主色·青 `#00B2F8`  | `--info` / `--chart-2`                                                        | `oklch(0.722 0.155 235.785)`    |
+| 主色·暗 `#212C3C`  | `--ink`（标题强调 / 遮罩）                                                    | `oklch(0.29 0.033 257.673)`     |
+| 字体一号 `#333333` | `--foreground` 及各 `--*-foreground`                                          | `oklch(0.321 0 0)`              |
+| 字体二号 `#666666` | `--muted-foreground`                                                          | `oklch(0.51 0 0)`               |
+| 字体五号 `#3AD75C` | `--success` / `--chart-3`                                                     | `oklch(0.7735 0.2095 146.6446)` |
+| 字体六号 `#FE660A` | `--warning` / `--chart-4`                                                     | `oklch(0.6945 0.2026 43.1038)`  |
+| 字体七号 `#FD2237` | `--destructive` / `--chart-5`                                                 | `oklch(0.636 0.244 24.335)`     |
+| 中性 BG `#F2F4F8`  | `--background`                                                                | `oklch(0.967 0.006 264.532)`    |
+| 中性模块 `#F5F5F5` | `--card` / `--popover` / `--sidebar`                                          | `oklch(0.97 0 0)`               |
+| 分割线 `#F0F0F0`   | `--secondary` / `--muted` / `--accent` / `--sidebar-accent`                   | `oklch(0.955 0 0)`              |
+| 中性描边 `#D9D9D9` | `--border` / `--input` / `--sidebar-border`                                   | `oklch(0.885 0 0)`              |
+
+色值均由 sRGB→OKLab 换算脚本精确生成（保留 3 位小数），**不要手抄近似值**——尤其灰度：粗略的明度公式会把 `#666666` 算成 0.533、`#D9D9D9` 算成 0.926，实际为 0.510 / 0.885。
+
+未单独设 token：字体三号 `#999999`（`oklch(0.683 0 0)`，占位符走 `--muted-foreground`）、字体四号 `#DADADA`（`oklch(0.888 0 0)`，与描边 `#D9D9D9` 仅差 1，由 `--border` 覆盖）。
+
+### 辅助色（60% / 20% 透明）用法
+
+规范中每组辅助色的后两档**不建 token**——直接用 Tailwind v4 透明度修饰符（`color-mix` 运行时生效）：
+
+```tsx
+// 蓝组：默认 / 60% / 20%
+<div className="bg-primary" />
+<div className="bg-primary/60" />
+<div className="bg-primary/20" />
+
+// 其余各组同理
+<span className="text-success" /> <span className="text-success/60" /> <span className="bg-success/20" />
+<div className="bg-ink/60" />   {/* 遮罩 */}
+<div className="bg-info/20" />
+<div className="bg-warning/60" />
+```
 
 ## Changesets
 
@@ -102,10 +144,10 @@ shadcn CLI 的 `aliases.ui` 是工作区级**单值**全局配置；所有未指
 
 因此，本仓库在每个 `registry/*.json` 的 `files[]` 中**显式声明** `target` 字段，让组件安装到与默认 shadcn 不同的子目录。
 
-| Registry 命名空间 | `files[].target` | 用户项目实际路径 |
-|---|---|---|
-| `@shadcn`（默认） | （省略，由 `aliases.ui` 决定） | `<aliases.ui>/button.tsx`，例如 `src/components/ui/button.tsx` |
-| `@shadcn-ui-lib` | `@ui/shadcn-ui-lib/button.tsx` | `<aliases.ui>/shadcn-ui-lib/button.tsx`，例如 `src/components/ui/shadcn-ui-lib/button.tsx` |
+| Registry 命名空间 | `files[].target`               | 用户项目实际路径                                                                           |
+| ----------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `@shadcn`（默认） | （省略，由 `aliases.ui` 决定） | `<aliases.ui>/button.tsx`，例如 `src/components/ui/button.tsx`                             |
+| `@shadcn-ui-lib`  | `@ui/shadcn-ui-lib/button.tsx` | `<aliases.ui>/shadcn-ui-lib/button.tsx`，例如 `src/components/ui/shadcn-ui-lib/button.tsx` |
 
 两套同名组件始终在不同的子目录，**永不覆盖**。
 

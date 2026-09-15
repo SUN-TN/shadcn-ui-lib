@@ -16,6 +16,7 @@ storybook-static
 *.sw?
 .zcode
 .codebuddy
+.workbuddy-ai
 
 # Logs
 logs

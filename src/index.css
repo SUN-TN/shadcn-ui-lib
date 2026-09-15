@@ -4,39 +4,64 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  /* ===== shadcn 语义 token ← UI/UX 颜色设计规范 =====
+     明度阶梯：交互面 #F0F0F0(0.955) < 页面 #F2F4F8(0.967) < 模块/卡片 #F5F5F5(0.970) */
+
+  /* 页面背景 ← 中性 BG #F2F4F8；正文 ← 字体一号 #333333 */
+  --background: oklch(0.967 0.006 264.532);
+  --foreground: oklch(0.321 0 0);
+
+  /* 卡片/弹层表面 ← 中性模块 #F5F5F5 */
+  --card: oklch(0.97 0 0);
+  --card-foreground: oklch(0.321 0 0);
+  --popover: oklch(0.97 0 0);
+  --popover-foreground: oklch(0.321 0 0);
+
+  /* 品牌主色 ← 主色蓝 #3091E1 */
+  --primary: oklch(0.639 0.149 247.984);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+
+  /* 次级按钮/弱底/hover ← 分割线灰 #F0F0F0 */
+  --secondary: oklch(0.955 0 0);
+  --secondary-foreground: oklch(0.321 0 0);
+  --muted: oklch(0.955 0 0);
+  --muted-foreground: oklch(0.51 0 0); /* 字体二号 #666666 */
+  --accent: oklch(0.955 0 0);
+  --accent-foreground: oklch(0.321 0 0);
+
+  /* 危险 ← 字体七号 #FD2237 */
+  --destructive: oklch(0.636 0.244 24.335);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* 描边/输入框边 ← 中性描边 #D9D9D9；聚焦环 ← 主色蓝 */
+  --border: oklch(0.885 0 0);
+  --input: oklch(0.885 0 0);
+  --ring: oklch(0.639 0.149 247.984);
+
+  /* 图表五色 ← 蓝 / 青 / 绿 / 橙 / 红 */
+  --chart-1: oklch(0.639 0.149 247.984);
+  --chart-2: oklch(0.722 0.155 235.785);
+  --chart-3: oklch(0.7735 0.2095 146.6446);
+  --chart-4: oklch(0.6945 0.2026 43.1038);
+  --chart-5: oklch(0.636 0.244 24.335);
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+
+  /* 侧边栏 ← 与主表面同源 */
+  --sidebar: oklch(0.97 0 0);
+  --sidebar-foreground: oklch(0.321 0 0);
+  --sidebar-primary: oklch(0.639 0.149 247.984);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.955 0 0);
+  --sidebar-accent-foreground: oklch(0.321 0 0);
+  --sidebar-border: oklch(0.885 0 0);
+  --sidebar-ring: oklch(0.639 0.149 247.984);
+
+  /* ===== 补充状态/强调 token（shadcn 缺失位，仅 4 个） ===== */
+  --success: oklch(0.7735 0.2095 146.6446); /* 字体五号 #3AD75C */
+  --warning: oklch(0.6945 0.2026 43.1038); /* 字体六号 #FE660A */
+  --info: oklch(0.722 0.155 235.785); /* 主色青 #00B2F8 */
+  --ink: oklch(0.29 0.033 257.673); /* 主色暗 #212C3C，标题强调/遮罩 */
 }
 
 .dark {
@@ -112,6 +137,12 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* 补充状态/强调 token → 工具类（bg-success、text-warning、bg-info/20、bg-ink/60 等） */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-ink: var(--ink);
 }
 
 @layer base {

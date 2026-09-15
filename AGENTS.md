@@ -8,17 +8,17 @@
 
 **shadcn-ui-lib** 是一个**对外发布的 shadcn registry 源**——以 GitHub 为分发通道，把组件作为源码 JSON 通过 `shadcn@latest add @shadcn-ui-lib/<name>` 安装到下游项目。不是普通前端项目，是组件库+registry的分发端。
 
-| 维度 | 选型 |
-|---|---|
-| 远程 | `git@github.com:SUN-TN/shadcn-ui-lib.git`（默认分支 `main`，公开） |
-| Runtime | Node ≥ 22 + pnpm 11.10 |
-| 构建 | Vite 8 + `@vitejs/plugin-react@^6`（底层 OXC，**非 SWC、非 Babel**） |
-| 语言 | **TypeScript `^6.0.3`**（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）——见下方"为什么用 v6 不升 v7" |
-| 样式 | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**没有 `tailwind.config`**） |
-| 演示 | Storybook 10 + `@storybook/react-vite`（仅 `@storybook/addon-a11y`、`@storybook/addon-themes`，**未装 `addon-essentials`**，因 SB10 无对应 v10 发布） |
-| 主题 | `next-themes` + CSS 变量（light/dark/system） |
-| Radix | **统一包 `radix-ui`**，不再按 `@radix-ui/react-*` 拆分（shadcn CLI v4.7+ 默认） |
-| 版本管理 | `@changesets/cli` |
+| 维度     | 选型                                                                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 远程     | `git@github.com:SUN-TN/shadcn-ui-lib.git`（默认分支 `main`，公开）                                                                                    |
+| Runtime  | Node ≥ 22 + pnpm 11.10                                                                                                                                |
+| 构建     | Vite 8 + `@vitejs/plugin-react@^6`（底层 OXC，**非 SWC、非 Babel**）                                                                                  |
+| 语言     | **TypeScript `^6.0.3`**（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）——见下方"为什么用 v6 不升 v7"                                    |
+| 样式     | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**没有 `tailwind.config`**）                                                                        |
+| 演示     | Storybook 10 + `@storybook/react-vite`（仅 `@storybook/addon-a11y`、`@storybook/addon-themes`，**未装 `addon-essentials`**，因 SB10 无对应 v10 发布） |
+| 主题     | `next-themes` + CSS 变量（light/dark/system）                                                                                                         |
+| Radix    | **统一包 `radix-ui`**，不再按 `@radix-ui/react-*` 拆分（shadcn CLI v4.7+ 默认）                                                                       |
+| 版本管理 | `@changesets/cli`                                                                                                                                     |
 
 ---
 
@@ -40,6 +40,7 @@ scripts/generate-registry.cjs
 ```
 
 **关键路径映射**：
+
 - 用户安装 `@shadcn-ui-lib/<name>` 后落到用户项目的 `<aliases.ui>/shadcn-ui-lib/<name>.tsx`（**不是** `<aliases.ui>/<name>.tsx`）
 - `lib/utils` 通过 `@lib/utils.ts` target 落到 `<aliases.lib>/utils.ts`
 - 与默认 `@shadcn` registry **不会**互相覆盖（因为每个文件都显式 `target`）
@@ -48,15 +49,15 @@ scripts/generate-registry.cjs
 
 ## 命令
 
-| 命令 | 用途 |
-|---|---|
-| `pnpm dev` | 启动 Storybook（http://localhost:6006） |
-| `pnpm typecheck` | `tsc -b --noEmit` |
-| `pnpm lint` | ESLint（0 errors，2 个 Fast Refresh warning 为已知） |
-| `pnpm build` | `tsc -b && vite build`（产出 `dist/`） |
-| `pnpm build-storybook` | 产出 `storybook-static/` |
+| 命令                                 | 用途                                                  |
+| ------------------------------------ | ----------------------------------------------------- |
+| `pnpm dev`                           | 启动 Storybook（http://localhost:6006）               |
+| `pnpm typecheck`                     | `tsc -b --noEmit`                                     |
+| `pnpm lint`                          | ESLint（0 errors，2 个 Fast Refresh warning 为已知）  |
+| `pnpm build`                         | `tsc -b && vite build`（产出 `dist/`）                |
+| `pnpm build-storybook`               | 产出 `storybook-static/`                              |
 | `node scripts/generate-registry.cjs` | 从 `src/shadcn-ui-lib/ui/` 重新生成 `registry/*.json` |
-| `pnpm changeset` | 新建 changeset |
+| `pnpm changeset`                     | 新建 changeset                                        |
 
 ---
 
@@ -92,6 +93,17 @@ shadcn CLI 的路径解析机制：
 - `registry/utils.json` 的 `dependencies: ["cn"]`，用户安装 registry 组件时 CLI 自动 `pnpm add cn`
 - 已通过 `pnpm dlx shadcn@latest migrate cn` 完成迁移；**不要**额外安装 `clsx` 或 `tailwind-merge`
 - shadcn CLI 生成新组件时默认导入的 `from "cn"` 是预期行为，**不要 sed 替换**
+
+## 色彩 token（语义化，勿造新 token）
+
+UI/UX 颜色设计规范已全部落在 `src/index.css` 的 shadcn 现有语义 token 上（OKLCH 格式）：
+
+- **改颜色只改 `:root` 里现有 token 的值**，不要新增 `--brand-*` / `--font-*` / `--neutral-*` / `--aux-*` 之类的非语义 token
+- 仅有 4 个补充 token：`--success`（#3AD75C）、`--warning`（#FE660A）、`--info`（#00B2F8）、`--ink`（#212C3C，遮罩/强调）
+- 辅助色的 60% / 20% 透明档**不建 token**——用 Tailwind v4 透明度修饰符：`bg-primary/60`、`bg-success/20`、`bg-ink/60`
+- `.dark` 段是中性 oklch 基线（规范只定义亮色），**不要**顺手改暗色
+- 明度阶梯约定：交互面 `#F0F0F0`(0.955) < 页面 `#F2F4F8`(0.967) < 模块/卡片 `#F5F5F5`(0.970)
+- 换算新色值时用脚本算 OKLCH（sRGB→OKLab 数学），**不要**手抄近似值
 
 ## CI 约束（`.github/workflows/regen-registry.yml`）
 
