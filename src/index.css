@@ -145,10 +145,13 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --radius: var(--radius);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) / 5 * 2);
+  --radius-md: calc(var(--radius) / 5 * 3);
+  --radius-lg: calc(var(--radius) / 5 * 4);
+  --radius-xl: calc(var(--radius) / 5 * 6);
+  --radius-2xl: calc(var(--radius) / 5 * 8);
+  --radius-3xl: calc(var(--radius) / 5 * 12);
+  --radius-4xl: calc(var(--radius) / 5 * 16);
 
   /* 补充状态/强调 token → 工具类（bg-success、text-warning、bg-info/20、bg-ink/60 等） */
   --color-success: var(--success);
