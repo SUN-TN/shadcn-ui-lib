@@ -49,6 +49,7 @@
       "success": "oklch(0.7735 0.2095 146.6446)",
       "warning": "oklch(0.6945 0.2026 43.1038)",
       "info": "oklch(0.722 0.155 235.785)",
+      "disabled": "oklch(0.885 0 0)",
       "ink": "oklch(0.29 0.033 257.673)"
     }
   },
@@ -94,6 +95,7 @@
       "--color-success": "var(--success)",
       "--color-warning": "var(--warning)",
       "--color-info": "var(--info)",
+      "--color-disabled": "var(--disabled)",
       "--color-ink": "var(--ink)"
     },
     "@custom-variant dark": "(&:is(.dark *))"
