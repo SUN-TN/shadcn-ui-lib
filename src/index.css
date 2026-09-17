@@ -155,6 +155,23 @@
   --color-info: var(--info);
   --color-disabled: var(--disabled);
   --color-ink: var(--ink);
+
+  /* 字号 + 行高 */
+  --text-title-lg: 18px;
+  --text-title-lg--line-height: 1.5; /* 元素外 */
+  --text-title-lg--line-height-tight: 1; /* 元素内，可选 */
+
+  --text-title-md: 16px;
+  --text-title-md--line-height: 1.5;
+
+  --text-body-strong: 16px;
+  --text-body-strong--line-height: 1.5;
+
+  --text-body: 14px;
+  --text-body--line-height: 1.5;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.5;
 }
 
 @layer base {
