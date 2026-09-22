@@ -44,7 +44,7 @@
       "sidebar-ring": "oklch(0.556 0 0)",
       "success": "oklch(0.7735 0.2095 146.6446)",
       "warning": "oklch(0.6945 0.2026 43.1038)",
-      "info": "oklch(0.722 0.155 235.785)",
+      "info": "oklch(0.682 0 0)",
       "disabled": "oklch(0.885 0 0)",
       "ink": "oklch(0.29 0.033 257.673)"
     }
