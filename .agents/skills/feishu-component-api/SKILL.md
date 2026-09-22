@@ -1,0 +1,359 @@
+---
+name: 'feishu-component-api'
+description: 'Design and author component API contracts on Feishu/Lark docs. Invoke when user asks to write, review, or iterate on API契约文档 for UI components, using the Feishu wiki template and CSS Token reference.'
+---
+
+# 飞书组件 API 契约设计 Skill
+
+**先有契约，再有代码**——把一个 UI 组件的 API 设计写入飞书 Wiki，作为后续实现的规格文档。
+
+## 两种模式
+
+| 模式                 | 触发方式                         | 顺序            | 说明                                           |
+| -------------------- | -------------------------------- | --------------- | ---------------------------------------------- |
+| **设计模式**（默认） | 用户提供模板 + Token 表 + 组件名 | **契约 → 代码** | 从参考库提取设计模式，从零设计 API             |
+| **反推模式**         | 用户显式说"读组件源码反推契约"   | **代码 → 契约** | 基于已有源码提取 Props/事件/aria，反向填充模板 |
+
+## 何时触发
+
+- **设计模式**（默认）：用户提供 API 契约模板 + CSS Token 映射表 + 组件名，要求"完善 API 契约"；用户说"参考 AntD / Radix / shadcn 的 X 组件设计"
+- **反推模式**：用户显式要求"读源码" / "基于现有组件反推" / "参考这个组件的实现"
+- **审查模式**：用户提供已有契约文档，要求"检查错漏 / 一致性 / 冲突"
+
+## 前置资源
+
+### 设计模式（默认）
+
+| 资源                 | 获取方式                           | 是否必需 | 用途                                                             |
+| -------------------- | ---------------------------------- | -------- | ---------------------------------------------------------------- |
+| **API 契约模板**     | 飞书 Wiki URL                      | ✅       | 章节结构、表格列定义（**不要擅自改格式！**）                     |
+| **CSS Token 映射表** | 飞书 Wiki URL                      | ✅       | Token 名称 ↔ HEX/OKLCH 值的**唯一真值来源**                      |
+| **参考库设计**       | AntD / Radix / MUI / shadcn 等 URL | 建议提供 | 设计模式选型（variant 枚举、size 阶梯、loading/color prop 形态） |
+| **需求描述**         | 用户口头/文字说明                  | 建议提供 | 组件用途、不适用场景、业务特定语义                               |
+
+**默认不读取项目组件源码**——契约先于代码，源码只是实现，不是规格来源。
+
+### 反推模式（需显式指定）
+
+| 资源             | 获取方式      | 是否必需 |
+| ---------------- | ------------- | -------- |
+| API 契约模板     | 飞书 Wiki URL | ✅       |
+| CSS Token 映射表 | 飞书 Wiki URL | ✅       |
+| **组件源码**     | 仓库文件路径  | ✅       |
+
+反推模式下从源码提取：Props 类型定义、variants/sizes 枚举、aria 属性处理、事件处理方式、默认值逻辑。
+
+---
+
+## 铁律（不可违反）
+
+1. **模板格式不可擅自改**——模板的列表类型、章节顺序、标题语义保持原样。如果模板用无序列表，不要改成表格
+2. **默认值列必须表达来源语义**——默认值列写硬编码但说明写"从 X 继承" → 语义自相矛盾。正确做法：默认值列写 `undefined` + 说明文本（如"未传入时由 X 决定"）
+3. **Token 值唯一来自 Token 映射表**——禁止凭印象写颜色值。所有 HEX/OKLCH 必须能在 Token 表里找到对应项
+4. **枚举值三处必须一致**——Props 表枚举值 / 变体映射表 / 组合规则引用 / 使用示例，四处的枚举值必须完全相同
+5. **内部 Token 名 vs 公开 API 别名**——CSS Token 内部名（如 `--destructive`）和公开 API 枚举（如 `"danger"`）是两回事。枚举只出现**语义别名**，Token 名的别名关系在颜色映射表说明里标注
+6. **预设映射表每一行必须完整**——每个 preset 的 variant 和 color 列都要有值，不能空、不能写 `"-"`。空列意味着该 preset 没有推荐值，这是设计不完备
+7. **文档写入前必须 fetch 最新 revision**——block-id 在每次文档编辑后都会变；不要缓存旧 block-id 盲目写入
+8. **默认不读源码**——设计模式下只从模板、Token 表、参考库、用户需求提取信息。反推模式必须用户显式指定
+
+---
+
+## 设计决策点（填表格之前必须回答）
+
+在动手填任何表格之前，先根据组件类型回答以下问题。不同组件的答案不同。
+
+### 1. 组件属于哪类？
+
+| 类型         | 特征             | 典型组件                              | 参考库                                 |
+| ------------ | ---------------- | ------------------------------------- | -------------------------------------- |
+| 原子交互元素 | 单一动作触发     | Button、Checkbox、Radio、Switch       | AntD Button、Radix Primitive           |
+| 输入框类     | 表单数据接收     | Input、Select、Textarea、DatePicker   | AntD Form、Radix Select                |
+| 反馈/通知类  | 信息展示         | Alert、Toast、Message、Tooltip        | AntD Feedback、Sonner                  |
+| 容器类       | 包裹内容管理状态 | Dialog、DropdownMenu、Tabs、Accordion | AntD Feedback/DataEntry、Radix Overlay |
+| 数据展示类   | 列表/表格/卡片   | Table、List、Card、Timeline           | AntD DataDisplay                       |
+
+### 2. 有没有"三层优先级链"？
+
+当组件的某类属性有**多层决策来源**时（例如"形状由 variant + preset + 独立默认值共同决定"），必须画出优先级链。常见情况：
+
+| 情况                               | 是否需要  | 示例                              |
+| ---------------------------------- | --------- | --------------------------------- |
+| variant 仅为形状 + 独立 color prop | ✅ 需要   | Button（形状/颜色分离设计）       |
+| variant 同时决定形状+颜色          | ❌ 不需要 | Alert（variant 直接决定整体外观） |
+| size 独立无覆盖                    | ❌ 不需要 | 大多数组件 size 是单值枚举        |
+| 有 preset 作为推荐组合             | ✅ 需要   | Button preset、Card variant       |
+
+### 3. 受控还是非受控？
+
+| 模式       | 特征                           | 典型                                             |
+| ---------- | ------------------------------ | ------------------------------------------------ |
+| **纯展示** | 无内部状态                     | Button、Card、Alert                              |
+| **非受控** | 内部 state + defaultValue      | Input、Checkbox、Dialog open                     |
+| **受控**   | 外部 value + onChange          | Input value/onChange、Tabs activeKey             |
+| **双模式** | 支持受控 + defaultValue 非受控 | Select、Dialog（open 受控 / defaultOpen 非受控） |
+
+### 4. loading / disabled 如何设计？
+
+| 设计                        | 适用场景                          | 参考                |
+| --------------------------- | --------------------------------- | ------------------- |
+| 仅 `disabled`               | 静态禁用态，不需要 loading        | 大多数组件          |
+| `disabled` + `loading` 分离 | 独立加载态，loading 自动 disabled | Button（AntD 参考） |
+| `loading` 含 spinner prop   | loading 时显示旋转图标            | Button、Button-like |
+| `loading` 仅视觉覆盖        | 灰显遮罩 + loading 文案           | Dialog loading 态   |
+
+### 5. size 枚举粒度？
+
+| 粒度         | 枚举                                 | 适用                       |
+| ------------ | ------------------------------------ | -------------------------- |
+| 3 档         | `small / medium / large`             | 大多数基础组件             |
+| 4 档         | `xs / sm / default / lg`             | 按钮、输入框等             |
+| 含 icon 系列 | `default / icon / icon-sm / icon-lg` | Button、IconButton         |
+| 响应式尺寸   | Tailwind 断点前缀类                  | 由业务层处理，组件自身不做 |
+
+### 6. 参考库选择哪些？
+
+| 参考库         | 适合                                             |
+| -------------- | ------------------------------------------------ |
+| **Ant Design** | 完整 API 设计、loading、color prop、受控/非受控  |
+| **Radix UI**   | Primitive 设计、语义化 a11y、组合式 API          |
+| **shadcn/ui**  | CVA variants、Tailwind-first、无 forwardRef 模式 |
+| **MUI**        | variant / color / size 三元组设计                |
+
+---
+
+## 标准流程（设计模式，7 阶段 + 2 检查点）
+
+### 阶段 1：获取模板与 Token
+
+```bash
+export PATH="<lark-cli-bin>:$PATH"
+lark-cli docs +fetch --doc "<模板URL>" --detail with-ids --as user
+lark-cli docs +fetch --doc "<TokenURL>" --detail with-ids --as user
+```
+
+从 Token 映射表提取：
+
+- 完整 Token ↔ HEX/OKLCH 值列表（主色、成功、警告、危险、信息、背景、表面、边框、文字）
+- 语义锚定规则（默认颜色用哪个 Token、背景/前景配对规则）
+- 圆角、间距、字号、阴影阶梯
+
+同时从参考库获取设计模式（阶段 2 的决策点 2-6）。
+
+### 阶段 2：设计决策（填表格之前）
+
+**根据上面的 6 个决策点，产出设计草案**：
+
+1. 组件类型归类 → 决定哪些章节是重点
+2. 画出完整优先级链（如果需要三层决策）
+3. 确定受控/非受控模式 → 决定 value / defaultValue / onChange 设计
+4. 确定 loading / disabled 设计 → 决定 loading icon prop 是否需要
+5. 确定 size 枚举粒度
+6. 确定参考库 → 决定命名风格和设计模式
+
+**产出形式**：5-8 行文字描述 + 1 个场景推导表（用于验证设计自洽性）。
+
+### 阶段 3：填充 Props 表
+
+Props 表列顺序（从模板继承，**不要改**）：
+
+| 名称 | 类型 | 默认值 | 必填 | 受控 | 枚举/范围 | 说明 |
+| ---- | ---- | ------ | ---- | ---- | --------- | ---- |
+
+**默认值列的三种正确写法**：
+
+| 情况                    | 写法                   | 示例                                        |
+| ----------------------- | ---------------------- | ------------------------------------------- |
+| prop 有独立硬编码默认值 | `"值"` 或 `boolean`    | `asChild: false`、`loading: false`          |
+| prop 依赖其他 prop 继承 | `undefined` + 说明文本 | `variant: undefined 未传入时由 preset 决定` |
+| prop 是纯占位符         | `—` 或 `undefined`     | `icon: —`                                   |
+
+**枚举值规范**：
+
+- 公开 API 只用**语义名**，不用内部 Token 名
+- 自定义值类型用 `string`，说明写"可传任意 CSS 值"
+- 受控列只在 value/open/activeKey 这类"外部控制状态"的 prop 上写"是"
+
+### 阶段 4：填充映射表
+
+根据决策点产出的设计，逐个填充变体/颜色/预设/尺寸映射表。通用规则：
+
+- 每张表的每一行**必须完整**（没有空列）
+- variant 映射表如果有"仅 variant 模式"的统一规则，用 `callout` 前置说明
+- 颜色映射表标注 Token 内部名 ↔ 公开别名的关系
+- 预设映射表的 color 列如果对应 preset 的 color 值，不要空
+
+### 阶段 5：填充组合规则
+
+组合规则是把优先级链从"设计意图"变成"开发者看得见的规则"。结构建议：
+
+```
+1. 覆盖类规则：preset + 显式 prop → prop 覆盖（最高优先级）
+2. 继承类规则：prop 未显式 → 从 preset 或默认值继承
+3. 互斥类规则：多个互斥 prop 同时传入时的行为
+4. 跨 preset 等价规则：variant + color 显式组合 ≡ 某个 preset
+5. 常用组合示例：列出 2-3 个典型跨 preset 用法
+6. 状态叠加规则：prop + disabled / loading / aria-invalid 的叠加行为
+7. 警告类规则：有风险的边界条件（如 asChild 非原生元素需额外处理）
+```
+
+**每条规则必须附示例**（`preset="X" + variant="Y" → 视觉描述`）。
+
+### 阶段 6：填充使用示例
+
+按"递进层次"组织代码块（从最简单入口到最复杂覆盖）：
+
+```
+1. 最简单入口（只用 preset / 只用默认值）
+2. 叠加覆盖（preset + 显式 prop）
+3. 完全自定义（不依赖 preset 的独立用法）
+4. size 系列
+5. icon + loading（如果有）
+6. 状态：disabled / loading / aria-invalid
+7. 自定义值（color=string 等）
+```
+
+### 阶段 7：文档写入
+
+```bash
+# Step 1: fetch 最新
+lark-cli docs +fetch --doc "<URL>" --detail with-ids --as user
+
+# Step 2: 生成 XML（HTML 子集）
+# callout: <callout emoji="🎯" background-color="light-blue" border-color="blue"><p>...</p></callout>
+# table:   <table><colgroup/><tbody><tr><td>...</td></tr></tbody></table>
+
+# Step 3: 写入
+lark-cli docs +update --doc "<URL>" \
+  --command block_replace --block-id "<BLOCK_ID>" \
+  --content "@./content.xml" --as user
+
+# Step 4: 验证
+lark-cli docs +fetch --doc "<URL>" --detail with-ids --as user
+# 确认 revision 递增 + block-id 变化
+```
+
+**常见错误**：
+
+- ❌ callout + table 作为一个整体做 `block_replace`（飞书把它们当独立 block）
+- ❌ 缓存旧 revision 的 block-id → block_id not found
+- ❌ 没 fetch 就写入 → 内容被静默忽略
+
+### 检查点 A：枚举值四处一致性
+
+| 检查       | 方法                          |
+| ---------- | ----------------------------- |
+| Props 表   | 搜索 prop 行的类型定义列      |
+| 变体映射表 | 搜索所有 `<code>"xxx"</code>` |
+| 组合规则   | 搜索 `prop="xxx"` 形式的引用  |
+| 使用示例   | 搜索代码块里的 prop 值        |
+
+**发现不一致 → 回退阶段 2 重新设计，不要硬填表格**。
+
+### 检查点 B：Token 值正确性
+
+用 Token 映射表的真值清单比对文档里出现的所有 HEX 值。
+
+```python
+for token, expected_hex in token_truth.items():
+    if expected_hex in document_content:
+        print(f"✅ {token}: {expected_hex}")
+    else:
+        print(f"⚠️ {token}: {expected_hex} 未出现")
+```
+
+---
+
+## 设计检查清单（交付前逐项打勾）
+
+- [ ] 模板章节/格式未改动（无序列表没改成表格、标题顺序保持）
+- [ ] 默认值列表达来源语义，无硬编码值与说明矛盾
+- [ ] 所有映射表每一行完整，无空列、无 "-" 占位
+- [ ] 公开 API 枚举与 Token 内部名的别名关系明确标注
+- [ ] 枚举值在 Props ↔ 映射表 ↔ 组合规则 ↔ 示例 四处完全一致
+- [ ] Token 值引用与 Token 映射表真值完全一致
+- [ ] 优先级链在设计决策阶段已画清，组合规则里明确写出
+- [ ] 边界条件（如仅 variant 显式 + color 隐式）在组合规则里有独立规则 + 示例
+- [ ] 使用示例按递进层次组织，覆盖所有主要组合
+- [ ] 文档写入后 fetch 确认 revision 递增 + block-id 变化
+
+---
+
+## 参考案例
+
+以下是一个完整的 Button 组件 API 契约设计案例，展示上述通用流程如何落地。
+
+### 组件基本信息
+
+| 项       | 值                                                 |
+| -------- | -------------------------------------------------- |
+| 组件     | Button（原子交互元素）                             |
+| 类型归类 | 原子交互元素                                       |
+| 参考库   | AntD Button 5.x、Radix Primitive、shadcn/ui        |
+| 设计模式 | 形状/颜色分离 + preset 推荐组合 + 纯展示无内部状态 |
+
+### 设计决策点产出
+
+**6 种预设**：`default / primary / success / warning / danger / info`
+
+- preset="default" → outlined + info（灰色描边，中性按钮）
+- 其余 5 种 → solid + 对应 color（实心彩色按钮）
+
+**三层优先级链**：
+
+```
+① prop 显式传入（variant / color）    → 最高优先级
+② preset 推荐值（preset 默认 "default"） → 同时决定形状和颜色
+③ variant 自带默认色（锚定 --primary）  → color 的兜底路径
+```
+
+**variant 枚举（6 种形状，无颜色含义）**：
+
+| variant  | 语义 | 仅 variant 模式下默认色              | hover                   |
+| -------- | ---- | ------------------------------------ | ----------------------- |
+| solid    | 实心 | bg-primary + text-primary-foreground | opacity 70%             |
+| outlined | 描边 | border-primary + text-primary        | opacity 70%             |
+| dashed   | 虚线 | border-primary-dashed + text-primary | opacity 70%             |
+| ghost    | 幽灵 | text-primary + transparent bg        | opacity 70%             |
+| link     | 链接 | text-primary                         | underline（透明度不变） |
+| text     | 文字 | text-primary + transparent bg        | opacity 70%             |
+
+**边界条件显式写入**："仅 variant 显式传入（preset/color 均隐式）时，variant 决定形状，color 走该 variant 的 2.2 映射表默认色（锚定 --primary）"
+
+**loading 设计**：`loading: boolean` + `icon: React.ReactNode`（普通状态作前缀图标，loading=true 时自动作为加载图标，未传时内置旋转 loader）
+
+### Props 表关键行摘录
+
+| 名称    | 类型                                      | 默认值      | 受控 | 说明                                                             |
+| ------- | ----------------------------------------- | ----------- | ---- | ---------------------------------------------------------------- |
+| preset  | `"default" \| "primary" \| ...`           | `"default"` | —    | 预设主题，提供 variant + color 推荐组合                          |
+| variant | `"solid" \| "outlined" \| ...`            | `undefined` | —    | 按钮形状。未传入时由 preset 决定。显式传入覆盖 preset            |
+| color   | `"primary" \| "success" \| ... \| string` | `undefined` | —    | 语义颜色。未传入时由 preset 或 variant 默认值决定                |
+| icon    | `React.ReactNode`                         | `—`         | —    | 独立图标 prop。普通状态前缀图标，loading=true 时自动作为加载图标 |
+| loading | `boolean`                                 | `false`     | ✅   | 加载态。true 时自动 disabled + 阻止点击                          |
+
+### 迭代历史（9 轮）
+
+| 轮次  | 问题                                                      | 修复                                                       |
+| ----- | --------------------------------------------------------- | ---------------------------------------------------------- |
+| 1 → 2 | 模板无序列表擅自改成表格                                  | 改回 `<ul>`                                                |
+| 3     | variant 默认值硬编码 `"solid"` 与说明"从 preset 继承"矛盾 | 默认值列改 `undefined`                                     |
+| 4     | preset="default" color 列空                               | 补 `"info"`                                                |
+| 5     | variant 枚举 Props(5) ≠ 映射表(6) ≠ 示例                  | 三处对齐                                                   |
+| 6     | color prop 枚举缺别名说明                                 | 公开只用 `"danger"`，Token 名 `--destructive` 在映射表说明 |
+| 7     | `--info` 色值错写成 `#00B2F8`                             | 对照 Token 表改为 `#999999`                                |
+| 8     | 未显式增加 `text` variant                                 | 新增并区分 link（underline）vs text（opacity 70%）hover    |
+| 9     | 边界条件"仅 variant 显式"未写进组合规则                   | 补一行规则 + 示例                                          |
+
+### Token 真值清单
+
+| Token                  | HEX     | 说明                          |
+| ---------------------- | ------- | ----------------------------- |
+| `--primary`            | #3091E1 | 品牌主色                      |
+| `--primary-foreground` | #FCFCFC | 主色反白                      |
+| `--destructive`        | #FD2237 | 危险红（公开别名 `"danger"`） |
+| `--success`            | #3AD75C | 成功绿                        |
+| `--warning`            | #FE660A | 警告橙                        |
+| `--info`               | #999999 | 信息灰                        |
+| `--background`         | #F2F4F8 | 页面背景                      |
+| `--secondary`          | #F0F0F0 | 交互面                        |
+| `--border`             | #D9D9D9 | 描边                          |
