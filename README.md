@@ -31,7 +31,7 @@ src/
 │   └── utils.ts             # re-exports `cn` from the `cn` package
 ├── App.tsx
 ├── main.tsx
-└── index.css               # Tailwind v4 入口 + 主题变量
+└── global.css              # Tailwind v4 入口 + 主题变量
 registry/                    # Registry JSON（发布源）
 .storybook/                 # Storybook 配置
 .github/workflows/          # CI
@@ -71,14 +71,14 @@ shadcn CLI 会把组件源码写到 `src/shadcn-ui-lib/ui/<name>.tsx`。导入�
 
 ## 色彩 token（语义化）
 
-UI/UX 颜色设计规范已全部落在 shadcn 现有语义 token 上（`src/index.css`，OKLCH 格式），**不新增品牌色工具类**；仅补充 4 个 shadcn 缺失的状态/强调 token：`--success`、`--warning`、`--info`、`--ink`。
+UI/UX 颜色设计规范已全部落在 shadcn 现有语义 token 上（`src/global.css`，OKLCH 格式），**不新增品牌色工具类**；仅补充 4 个 shadcn 缺失的状态/强调 token：`--success`、`--warning`、`--info`、`--ink`。
 
 ### 设计规范 → 语义 token 映射（亮色 `:root`）
 
 | 设计规范           | 语义 token                                                                    | 值（oklch）                     |
 | ------------------ | ----------------------------------------------------------------------------- | ------------------------------- |
 | 主色·蓝 `#3091E1`  | `--primary` / `--ring` / `--sidebar-primary` / `--sidebar-ring` / `--chart-1` | `oklch(0.639 0.149 247.984)`    |
-| 主色·青 `#00B2F8`  | `--info` / `--chart-2`                                                        | `oklch(0.722 0.155 235.785)`    |
+| 主色·青 `#00B2F8`  | `--chart-2`（仅图表；`--info` 已于 2026-09-22 改为 `#999999`）                | `oklch(0.722 0.155 235.785)`    |
 | 主色·暗 `#212C3C`  | `--ink`（标题强调 / 遮罩）                                                    | `oklch(0.29 0.033 257.673)`     |
 | 字体一号 `#333333` | `--foreground` 及各 `--*-foreground`                                          | `oklch(0.321 0 0)`              |
 | 字体二号 `#666666` | `--muted-foreground`                                                          | `oklch(0.51 0 0)`               |
@@ -92,7 +92,7 @@ UI/UX 颜色设计规范已全部落在 shadcn 现有语义 token 上（`src/ind
 
 色值均由 sRGB→OKLab 换算脚本精确生成（保留 3 位小数），**不要手抄近似值**——尤其灰度：粗略的明度公式会把 `#666666` 算成 0.533、`#D9D9D9` 算成 0.926，实际为 0.510 / 0.885。
 
-未单独设 token：字体三号 `#999999`（`oklch(0.683 0 0)`，占位符走 `--muted-foreground`）、字体四号 `#DADADA`（`oklch(0.888 0 0)`，与描边 `#D9D9D9` 仅差 1，由 `--border` 覆盖）。
+字体三号 `#999999` 已设两个 token 且**同值**：`--subtle-foreground` 与 `--info`（均为 `oklch(0.682 0 0)`；`--info` 的旧值 `#00B2F8` 已作废）；字体四号 `#DADADA`（`oklch(0.888 0 0)`，与描边 `#D9D9D9` 仅差 1，由 `--border` 覆盖）。
 
 ### 辅助色（60% / 20% 透明）用法
 
@@ -200,7 +200,7 @@ import { Button } from '@/components/ui/shadcn-ui-lib/button';
 
 ### 色彩 token 自动下发
 
-组件装下去只是"源码到位"，设计规范要生效还得把 `src/index.css` 里的 token 写进用户项目。本仓库把 token 做成了 `registry:theme` 项，**每个 UI 组件的 `registryDependencies` 都带 `theme.json`，所以装任意组件都会自动 upsert token**。
+组件装下去只是"源码到位"，设计规范要生效还得把 `src/global.css` 里的 token 写进用户项目。本仓库把 token 做成了 `registry:theme` 项，**每个 UI 组件的 `registryDependencies` 都带 `theme.json`，所以装任意组件都会自动 upsert token**。
 
 ```bash
 # 也可以单独装 / 单独更新 token
@@ -209,7 +209,7 @@ shadcn add @shadcn-ui-lib/theme
 
 CLI 会按 Tailwind v4 管线写入 `components.json` 里 `tailwind.css` 指向的 CSS 文件：
 
-- `cssVars.light` → 写进 `:root`（37 个变量，来自 `src/index.css` 的 `:root`）
+- `cssVars.light` → 写进 `:root`（37 个变量，来自 `src/global.css` 的 `:root`）
 - `css["@theme inline"]` → 逐字写进 `@theme inline`（`--color-*` 映射 + `--radius-*`，40 项）
 - `css["@custom-variant dark"]` → `(&:is(.dark *))`
 

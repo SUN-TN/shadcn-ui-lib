@@ -57,9 +57,9 @@ description: 'Design and author component API contracts for UI components (Feish
 | 资源                     | 路径               | 用途                                                        |
 | ------------------------ | ------------------ | ----------------------------------------------------------- |
 | `references/token-v1.md` | 本 skill 目录内    | 飞书《CSS Token 映射表 V1》离线快照；三列映射的唯一离线真值 |
-| `src/index.css`          | 项目根（仅本项目） | **最终权威**：所有 token 的 OKLCH 真值，改 token 以它为源   |
+| `src/global.css`         | 项目根（仅本项目） | **最终权威**：所有 token 的 OKLCH 真值，改 token 以它为源   |
 
-> 本项目 `src/index.css` 是色彩 token 的唯一真源（见 AGENTS.md）。`references/token-v1.md` 是飞书 V1 的离线快照，V2 发布或 `src/index.css` 改动后须同步更新。
+> 本项目 `src/global.css` 是色彩 token 的唯一真源（见 AGENTS.md）。`references/token-v1.md` 是飞书 V1 的离线快照，V2 发布或 `src/global.css` 改动后须同步更新。
 
 ---
 
@@ -67,7 +67,7 @@ description: 'Design and author component API contracts for UI components (Feish
 
 1. **模板格式不可擅自改**——模板的列表类型、章节顺序、标题语义保持原样。如果模板用无序列表，不要改成表格
 2. **默认值列必须表达来源语义**——默认值列写硬编码但说明写"从 X 继承" → 语义自相矛盾。正确做法：默认值列写 `undefined` + 说明文本（如"未传入时由 X 决定"）
-3. **Token 值唯一来自 Token 映射表**——禁止凭印象写颜色值。所有 HEX/OKLCH 必须能在 Token 表（或 `src/index.css` / `references/token-v1.md`）里找到对应项
+3. **Token 值唯一来自 Token 映射表**——禁止凭印象写颜色值。所有 HEX/OKLCH 必须能在 Token 表（或 `src/global.css` / `references/token-v1.md`）里找到对应项
 4. **枚举值三处必须一致**——Props 表枚举值 / 变体映射表 / 组合规则引用 / 使用示例，四处的枚举值必须完全相同
 5. **内部 Token 名 vs 公开 API 别名**——CSS Token 内部名（如 `--destructive`）和公开 API 枚举（如 `"danger"`）是两回事。枚举只出现**语义别名**，Token 名的别名关系在颜色映射表说明里标注
 6. **预设映射表每一行必须完整**——每个 preset 的 variant 和 color 列都要有值，不能空、不能写 `"-"`。空列意味着该 preset 没有推荐值，这是设计不完备
@@ -95,7 +95,7 @@ description: 'Design and author component API contracts for UI components (Feish
 > **R0 元规则（组织方式）**：按「产物 / 领域」归集规则，不按「规则条数」归集。同产物（组件契约）的规则都攒进本 skill 的 R1~Rn；用 `references/` 下沉长清单防止 SKILL.md 膨胀。出现以下信号才拆分出新 skill：① 触发域发散（规则服务的不再是组件契约文档）；② 某规则需被多个 skill 复用（如 Markdown 风格，可提升为独立 `doc-style` skill 被本 skill 引用）；③ SKILL.md 正文超过 ~150 行或规则彼此正交且过长。新增规则直接在此追加编号，并在 references 中补充依据。
 
 - **R1 三列优先，最少两列**：凡涉及 CSS Token 映射的表格，优先含 `figma 变量名` / `tailwind 工具类` / `对应的 css 值` 三列，css 值以 oklch 优先，可附 hex。若某 tailwind 工具类（如 `px-[6px]`、`w-[120px]` 等任意值，或间距/尺寸的非标档位）在 token 映射表中找不到对应 figma 变量，则该行至少须含 `tailwind 工具类` 与 `对应的 css 值` 两列，并在说明列标注"非标"或来源。
-- **R2 真值源唯一**：飞书《CSS Token 映射表 V1》为唯一真值源；三列必须两两对应且都落在 V1 标准 token 上。离线时用 `references/token-v1.md` 快照；本项目改 token 以 `src/index.css` 为最终权威。
+- **R2 真值源唯一**：飞书《CSS Token 映射表 V1》为唯一真值源；三列必须两两对应且都落在 V1 标准 token 上。离线时用 `references/token-v1.md` 快照；本项目改 token 以 `src/global.css` 为最终权威。
 - **R3 落标准 token**：间距档位仅 2/4/8/12/16/24…（无 6px 等非标）；圆角 `--radius`≈10px，sm/md/lg/xl = 4/6/8/12px；颜色用 V1 主色 / 危险 / 成功等语义 token。
 - **R4 不一致先给方案**：发现三列不对应，先列出不一致项并给出「以哪个值为准」的若干方案，让用户决策后再改另外两个值。
 - **R5 Markdown 风格**：沿用 `Markdown 实用手册.md`（`#` 顶级 + `###` 子章节、列表项间空行、代码块标注语言、引用块提示、FAQ + 总结）。
@@ -103,9 +103,10 @@ description: 'Design and author component API contracts for UI components (Feish
 
 ### 标准 Token 速查
 
-见 `references/token-v1.md`（关键值：主色 `--primary` oklch(0.639 0.149 247.984)#3091E1；危险 `--destructive` oklch(0.636 0.244 24.335)#FD2237；信息 `--info` oklch(0.722 0.155 235.785)#00B2F8；基础圆角 10px、md 6px 等）。
+见 `references/token-v1.md`（关键值：主色 `--primary` oklch(0.639 0.149 247.984)#3091E1；危险 `--destructive` oklch(0.636 0.244 24.335)#FD2237；信息 `--info` oklch(0.682 0 0)**#999999**；基础圆角 10px、md 6px 等）。
 
-> ⚠️ 易错点：本项目 `#999999` 是 `--subtle-foreground`（弱化文字），**不是** `--info`。`--info` 是 `#00B2F8`（蓝）。下文参考案例的历史快照里曾把 `--info` 误写成 `#999999`，请以 token-v1.md / src/index.css 为准。
+> ⚠️ 易错点（2026-09-22 更新）：`--info` 现为 **#999999（灰）**，与 `--subtle-foreground` **同值**。飞书《CSS Token 映射表 V1》已同步改值，`references/token-v1.md` 快照中的 `color/status/info` 同样是 #999999。
+> 旧值 **#00B2F8（信息蓝）已作废**：历史契约文档、旧版快照、记忆里若出现 #00B2F8，一律视为过期值并按 #999999 纠正；反之，不要因为印象里的"信息蓝"就判定 #999999 写错。
 
 ---
 
@@ -190,7 +191,7 @@ lark-cli docs +fetch --doc "<TokenURL>" --detail with-ids --as user
 
 同时从参考库获取设计模式（阶段 2 的决策点 2-6）。
 
-> 离线或本地优先：先对照 `src/index.css`（真源）与 `references/token-v1.md`（飞书快照），所有颜色/间距/圆角取值必须落在其列。
+> 离线或本地优先：先对照 `src/global.css`（真源）与 `references/token-v1.md`（飞书快照），所有颜色/间距/圆角取值必须落在其列。
 
 ### 阶段 2：设计决策（填表格之前）
 
@@ -305,7 +306,7 @@ lark-cli docs +fetch --doc "<URL>" --detail with-ids --as user
 
 ### 检查点 B：Token 值正确性（R1/R2/R3/R4）
 
-用 Token 真值清单（`src/index.css` + `references/token-v1.md`）比对文档里出现的所有颜色/间距/圆角值：
+用 Token 真值清单（`src/global.css` + `references/token-v1.md`）比对文档里出现的所有颜色/间距/圆角值：
 
 ```python
 for token, expected_oklch in token_truth.items():
@@ -396,37 +397,37 @@ for token, expected_oklch in token_truth.items():
 
 ### 迭代历史（9 轮）
 
-| 轮次  | 问题                                                        | 修复                                                       |
-| ----- | ----------------------------------------------------------- | ---------------------------------------------------------- |
-| 1 → 2 | 模板无序列表擅自改成表格                                    | 改回 `<ul>`                                                |
-| 3     | variant 默认值硬编码 `"solid"` 与说明"从 preset 继承"矛盾   | 默认值列改 `undefined`                                     |
-| 4     | preset="default" color 列空                                 | 补 `"info"`                                                |
-| 5     | variant 枚举 Props(5) ≠ 映射表(6) ≠ 示例                    | 三处对齐                                                   |
-| 6     | color prop 枚举缺别名说明                                   | 公开只用 `"danger"`，Token 名 `--destructive` 在映射表说明 |
-| 7     | `--info` 色值误写成 `#999999`（实为 `--subtle-foreground`） | 对照真值源改 `#00B2F8`（见上方 ⚠️ 易错点）                 |
-| 8     | 未显式增加 `text` variant                                   | 新增并区分 link（underline）vs text（opacity 70%）hover    |
-| 9     | 边界条件"仅 variant 显式"未写进组合规则                     | 补一行规则 + 示例                                          |
+| 轮次  | 问题                                                       | 修复                                                                                           |
+| ----- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 1 → 2 | 模板无序列表擅自改成表格                                   | 改回 `<ul>`                                                                                    |
+| 3     | variant 默认值硬编码 `"solid"` 与说明"从 preset 继承"矛盾  | 默认值列改 `undefined`                                                                         |
+| 4     | preset="default" color 列空                                | 补 `"info"`                                                                                    |
+| 5     | variant 枚举 Props(5) ≠ 映射表(6) ≠ 示例                   | 三处对齐                                                                                       |
+| 6     | color prop 枚举缺别名说明                                  | 公开只用 `"danger"`，Token 名 `--destructive` 在映射表说明                                     |
+| 7     | 当时 `--info` 为 #00B2F8，却误写成 `#999999`（弱化文字值） | 对照真值源改 `#00B2F8`（⚠️ 2026-09-22 起本项目 `--info` 已正式改为 #999999，此条仅作历史留档） |
+| 8     | 未显式增加 `text` variant                                  | 新增并区分 link（underline）vs text（opacity 70%）hover                                        |
+| 9     | 边界条件"仅 variant 显式"未写进组合规则                    | 补一行规则 + 示例                                                                              |
 
-### Token 真值清单（以 src/index.css / token-v1.md 为准）
+### Token 真值清单（以 src/global.css / token-v1.md 为准）
 
-| Token                  | OKLCH                         | HEX     | 说明                          |
-| ---------------------- | ----------------------------- | ------- | ----------------------------- |
-| `--primary`            | oklch(0.639 0.149 247.984)    | #3091E1 | 品牌主色                      |
-| `--primary-foreground` | oklch(0.985 0 0)              | #FCFCFC | 主色反白                      |
-| `--destructive`        | oklch(0.636 0.244 24.335)     | #FD2237 | 危险红（公开别名 `"danger"`） |
-| `--success`            | oklch(0.7735 0.2095 146.6446) | #3AD75C | 成功绿                        |
-| `--warning`            | oklch(0.6945 0.2026 43.1038)  | #FE660A | 警告橙                        |
-| `--info`               | oklch(0.722 0.155 235.785)    | #00B2F8 | 信息蓝                        |
-| `--subtle-foreground`  | oklch(0.682 0 0)              | #999999 | 弱化文字（易与 --info 混淆）  |
-| `--background`         | oklch(0.967 0.006 264.532)    | #F2F4F8 | 页面背景                      |
-| `--secondary`          | oklch(0.955 0 0)              | #F0F0F0 | 交互面                        |
-| `--border`             | oklch(0.885 0 0)              | #D9D9D9 | 描边                          |
+| Token                  | OKLCH                         | HEX     | 说明                                                       |
+| ---------------------- | ----------------------------- | ------- | ---------------------------------------------------------- |
+| `--primary`            | oklch(0.639 0.149 247.984)    | #3091E1 | 品牌主色                                                   |
+| `--primary-foreground` | oklch(0.985 0 0)              | #FCFCFC | 主色反白                                                   |
+| `--destructive`        | oklch(0.636 0.244 24.335)     | #FD2237 | 危险红（公开别名 `"danger"`）                              |
+| `--success`            | oklch(0.7735 0.2095 146.6446) | #3AD75C | 成功绿                                                     |
+| `--warning`            | oklch(0.6945 0.2026 43.1038)  | #FE660A | 警告橙                                                     |
+| `--info`               | oklch(0.682 0 0)              | #999999 | 信息灰（与 --subtle-foreground 同值；旧值 #00B2F8 已作废） |
+| `--subtle-foreground`  | oklch(0.682 0 0)              | #999999 | 弱化文字（与 --info 同值）                                 |
+| `--background`         | oklch(0.967 0.006 264.532)    | #F2F4F8 | 页面背景                                                   |
+| `--secondary`          | oklch(0.955 0 0)              | #F0F0F0 | 交互面                                                     |
+| `--border`             | oklch(0.885 0 0)              | #D9D9D9 | 描边                                                       |
 
 ---
 
 ## 参考资源 / Resources
 
-- `references/token-v1.md`：飞书《CSS Token 映射表 V1》离线快照（figma / tailwind / css 三列），离线可用；以 `src/index.css` 为最终权威，V2 发布或改 token 时更新。
+- `references/token-v1.md`：飞书《CSS Token 映射表 V1》离线快照（figma / tailwind / css 三列），离线可用；以 `src/global.css` 为最终权威，V2 发布或改 token 时更新。
 - `references/contract-template.md`：组件契约 Markdown 本地模板（含三列尺寸表 / 样式映射表骨架），用于新建本地契约文档。
 - 飞书《CSS Token 映射表 V1》在线真值源（设计模式下通过 `lark-cli docs +fetch` 获取最新）。
-- 项目 `src/index.css`：本项目色彩/间距/圆角 token 的唯一真源（见 AGENTS.md）。
+- 项目 `src/global.css`：本项目色彩/间距/圆角 token 的唯一真源（见 AGENTS.md）。

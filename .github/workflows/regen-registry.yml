@@ -6,7 +6,7 @@ on:
     paths:
       - 'src/shadcn-ui-lib/ui/**'
       - 'src/lib/**'
-      - 'src/index.css'
+      - 'src/global.css'
       - 'src/components/theme/**'
       - 'scripts/generate-registry.cjs'
   pull_request:
@@ -14,7 +14,7 @@ on:
     paths:
       - 'src/shadcn-ui-lib/ui/**'
       - 'src/lib/**'
-      - 'src/index.css'
+      - 'src/global.css'
       - 'src/components/theme/**'
       - 'scripts/generate-registry.cjs'
 

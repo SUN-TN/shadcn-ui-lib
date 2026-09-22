@@ -18,20 +18,20 @@
 
 ## 二、目标技术栈（与 package.json 锁定的实际版本完全一致）
 
-| 维度 | 选型 | 锁定版本 |
-|---|---|---|
-| 构建框架 | Vite + `@vitejs/plugin-react` v6+（**底层 OXC**，不是 SWC、不是 Babel） | `vite ^8.2.2`、`@vitejs/plugin-react ^6.1.1` |
-| 语言 | **TypeScript v6（不升 v7）** | `typescript ^6.0.3` |
-| 样式 | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**无 `tailwind.config`**） | `tailwindcss ^4.3.3`、`@tailwindcss/vite ^4.3.3` |
-| UI 基础 | shadcn/ui CLI v4.7+（统一 `radix-ui` 包，**非** `@radix-ui/react-*`） | `radix-ui ^1.6.7` |
-| 演示 | Storybook 10（**仅** `addon-a11y` + `addon-themes`，**不装** `addon-essentials`） | `storybook ^10.6.0` |
-| 主题 | `next-themes` + CSS 变量 | `next-themes ^0.4.6` |
-| 图标 | `lucide-react` | `lucide-react ^1.43.0` |
-| 通知 | `sonner` | `sonner ^2.0.8` |
-| 工具 | `cn()` via `clsx` + `tailwind-merge`；动效用 `tw-animate-css` | `clsx ^2.1.1`、`tailwind-merge ^3.6.0`、`tw-animate-css ^1.4.0` |
-| 工程化 | ESLint 9 flat + Prettier 3 + Husky + lint-staged | 同 package.json |
-| 版本管理 | `@changesets/cli` | `^3.0.2` |
-| 包管理 | pnpm | `pnpm@11.10.0`、`engines.node >=22` |
+| 维度     | 选型                                                                              | 锁定版本                                                        |
+| -------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 构建框架 | Vite + `@vitejs/plugin-react` v6+（**底层 OXC**，不是 SWC、不是 Babel）           | `vite ^8.2.2`、`@vitejs/plugin-react ^6.1.1`                    |
+| 语言     | **TypeScript v6（不升 v7）**                                                      | `typescript ^6.0.3`                                             |
+| 样式     | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**无 `tailwind.config`**）      | `tailwindcss ^4.3.3`、`@tailwindcss/vite ^4.3.3`                |
+| UI 基础  | shadcn/ui CLI v4.7+（统一 `radix-ui` 包，**非** `@radix-ui/react-*`）             | `radix-ui ^1.6.7`                                               |
+| 演示     | Storybook 10（**仅** `addon-a11y` + `addon-themes`，**不装** `addon-essentials`） | `storybook ^10.6.0`                                             |
+| 主题     | `next-themes` + CSS 变量                                                          | `next-themes ^0.4.6`                                            |
+| 图标     | `lucide-react`                                                                    | `lucide-react ^1.43.0`                                          |
+| 通知     | `sonner`                                                                          | `sonner ^2.0.8`                                                 |
+| 工具     | `cn()` via `clsx` + `tailwind-merge`；动效用 `tw-animate-css`                     | `clsx ^2.1.1`、`tailwind-merge ^3.6.0`、`tw-animate-css ^1.4.0` |
+| 工程化   | ESLint 9 flat + Prettier 3 + Husky + lint-staged                                  | 同 package.json                                                 |
+| 版本管理 | `@changesets/cli`                                                                 | `^3.0.2`                                                        |
+| 包管理   | pnpm                                                                              | `pnpm@11.10.0`、`engines.node >=22`                             |
 
 ---
 
@@ -66,7 +66,7 @@ shadcn-ui-lib/
 ├── src/
 │   ├── App.tsx
 │   ├── main.tsx
-│   ├── index.css
+│   ├── global.css
 │   ├── vite-env.d.ts
 │   ├── lib/
 │   │   └── utils.ts
@@ -143,8 +143,8 @@ shadcn-ui-lib/
     "prepare": "husky",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
-  }
+    "release": "changeset publish",
+  },
 }
 ```
 
@@ -197,10 +197,7 @@ strict-peer-dependencies=false
 ```json
 {
   "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "paths": { "@/*": ["./src/*"] }
   }
@@ -232,9 +229,9 @@ strict-peer-dependencies=false
     "noEmit": true,
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "paths": { "@/*": ["./src/*"] }
+    "paths": { "@/*": ["./src/*"] },
   },
-  "include": ["src", ".storybook/**/*"]
+  "include": ["src", ".storybook/**/*"],
 }
 ```
 
@@ -257,9 +254,9 @@ strict-peer-dependencies=false
     "noEmit": true,
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "types": ["node"]
+    "types": ["node"],
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts"],
 }
 ```
 
@@ -296,10 +293,7 @@ export default tseslint.config(
   { ignores: ['dist', 'storybook-static', 'node_modules', '.storybook/**/*'] },
   {
     files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommended,
-    ],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',
@@ -323,7 +317,7 @@ export default {
   singleQuote: true,
   printWidth: 100,
   plugins: ['prettier-plugin-tailwindcss'],
-  tailwindStylesheet: './src/index.css',
+  tailwindStylesheet: './src/global.css',
 };
 ```
 
@@ -366,7 +360,7 @@ export default {};
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/index.css",
+    "css": "src/global.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -432,7 +426,7 @@ export default config;
 
 ```tsx
 import type { Preview } from '@storybook/react';
-import '../src/index.css';
+import '../src/global.css';
 import { ThemeProvider } from '../src/components/theme/theme-provider';
 import { Toaster } from '../src/shadcn-ui-lib/ui/sonner';
 import React from 'react';
@@ -441,7 +435,7 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="bg-background text-foreground min-h-screen p-6">
+        <div className="min-h-screen bg-background p-6 text-foreground">
           <Story />
           <Toaster richColors position="top-right" />
         </div>
@@ -475,7 +469,7 @@ declare module '*.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import './index.css';
+import './global.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found');
@@ -496,10 +490,10 @@ import { Toaster } from './shadcn-ui-lib/ui/sonner';
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <main className="bg-background text-foreground min-h-screen p-6">
+      <main className="min-h-screen bg-background p-6 text-foreground">
         <h1 className="text-2xl font-semibold">shadcn-ui-lib</h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Run <code className="bg-muted rounded px-1 py-0.5">pnpm dev</code> to launch Storybook.
+        <p className="mt-2 text-sm text-muted-foreground">
+          Run <code className="rounded bg-muted px-1 py-0.5">pnpm dev</code> to launch Storybook.
         </p>
       </main>
       <Toaster richColors position="top-right" />
@@ -514,7 +508,7 @@ export default function App() {
 /// <reference types="vite/client" />
 ```
 
-### 5.4 `src/index.css`（Tailwind v4 CSS-first + 33 个 OKLCH 变量）
+### 5.4 `src/global.css`（Tailwind v4 CSS-first + 33 个 OKLCH 变量）
 
 ```css
 @import 'tailwindcss';
@@ -671,6 +665,7 @@ export function ThemeProvider(props: ComponentProps<typeof NextThemesProvider>) 
 **不能手写**——通过 `pnpm dlx shadcn@latest add <name>` 拉取。
 
 拉取后必须做两处修正：
+
 1. `sed 's|from "cn"|from "@/lib/utils"|g' src/shadcn-ui-lib/ui/*.tsx`
 2. `pnpm remove cn`
 
@@ -694,11 +689,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { args: { /*...*/ } };
+export const Default: Story = { args: {/*...*/} };
 // ... 2-8 个 variants
 ```
 
 文件名约定：
+
 - `sonner.tsx` → `toast.stories.tsx`（title 为 `Components/Toast`）
 - 其他 9 个组件 → `<name>.stories.tsx`
 
@@ -721,6 +717,7 @@ style={ { /* ... */ } as CSSProperties }
 ### 6.1 `scripts/generate-registry.cjs`
 
 完整内容约 200 行。逻辑概要：
+
 - 读取 `src/shadcn-ui-lib/ui/*.tsx` 与 `src/lib/utils.ts`
 - 自动提取 npm 依赖（排除 react/react-dom）
 - 自动构建 `registryDependencies`（同 registry 内跨组件 + 强制追加 `"utils"`）
@@ -732,20 +729,20 @@ style={ { /* ... */ } as CSSProperties }
 
 ### 6.2 生成的 registry 文件清单（**不要手写**）
 
-| 文件 | type | target | dependencies | registryDependencies |
-|---|---|---|---|---|
-| `registry/utils.json` | `registry:lib` | `@lib/utils.ts` | `clsx`, `tailwind-merge` | — |
-| `registry/button.json` | `registry:ui` | `@ui/shadcn-ui-lib/button.tsx` | `class-variance-authority`, `radix-ui` | `[utils]` |
-| `registry/input.json` | `registry:ui` | `@ui/shadcn-ui-lib/input.tsx` | — | `[utils]` |
-| `registry/card.json` | `registry:ui` | `@ui/shadcn-ui-lib/card.tsx` | — | `[utils]` |
-| `registry/dialog.json` | `registry:ui` | `@ui/shadcn-ui-lib/dialog.tsx` | `lucide-react`, `radix-ui` | `[button, utils]` |
-| `registry/sheet.json` | `registry:ui` | `@ui/shadcn-ui-lib/sheet.tsx` | `lucide-react`, `radix-ui` | `[utils]` |
-| `registry/dropdown-menu.json` | `registry:ui` | `@ui/shadcn-ui-lib/dropdown-menu.tsx` | `lucide-react`, `radix-ui` | `[utils]` |
-| `registry/tabs.json` | `registry:ui` | `@ui/shadcn-ui-lib/tabs.tsx` | `class-variance-authority`, `radix-ui` | `[utils]` |
-| `registry/select.json` | `registry:ui` | `@ui/shadcn-ui-lib/select.tsx` | `lucide-react`, `radix-ui` | `[utils]` |
-| `registry/avatar.json` | `registry:ui` | `@ui/shadcn-ui-lib/avatar.tsx` | `radix-ui` | `[utils]` |
-| `registry/sonner.json` | `registry:ui` | `@ui/shadcn-ui-lib/sonner.tsx` | `lucide-react`, `next-themes`, `sonner` | `[utils]` |
-| `registry/index.json` | — | — | — | —（汇总索引）|
+| 文件                          | type           | target                                | dependencies                            | registryDependencies |
+| ----------------------------- | -------------- | ------------------------------------- | --------------------------------------- | -------------------- |
+| `registry/utils.json`         | `registry:lib` | `@lib/utils.ts`                       | `clsx`, `tailwind-merge`                | —                    |
+| `registry/button.json`        | `registry:ui`  | `@ui/shadcn-ui-lib/button.tsx`        | `class-variance-authority`, `radix-ui`  | `[utils]`            |
+| `registry/input.json`         | `registry:ui`  | `@ui/shadcn-ui-lib/input.tsx`         | —                                       | `[utils]`            |
+| `registry/card.json`          | `registry:ui`  | `@ui/shadcn-ui-lib/card.tsx`          | —                                       | `[utils]`            |
+| `registry/dialog.json`        | `registry:ui`  | `@ui/shadcn-ui-lib/dialog.tsx`        | `lucide-react`, `radix-ui`              | `[button, utils]`    |
+| `registry/sheet.json`         | `registry:ui`  | `@ui/shadcn-ui-lib/sheet.tsx`         | `lucide-react`, `radix-ui`              | `[utils]`            |
+| `registry/dropdown-menu.json` | `registry:ui`  | `@ui/shadcn-ui-lib/dropdown-menu.tsx` | `lucide-react`, `radix-ui`              | `[utils]`            |
+| `registry/tabs.json`          | `registry:ui`  | `@ui/shadcn-ui-lib/tabs.tsx`          | `class-variance-authority`, `radix-ui`  | `[utils]`            |
+| `registry/select.json`        | `registry:ui`  | `@ui/shadcn-ui-lib/select.tsx`        | `lucide-react`, `radix-ui`              | `[utils]`            |
+| `registry/avatar.json`        | `registry:ui`  | `@ui/shadcn-ui-lib/avatar.tsx`        | `radix-ui`                              | `[utils]`            |
+| `registry/sonner.json`        | `registry:ui`  | `@ui/shadcn-ui-lib/sonner.tsx`        | `lucide-react`, `next-themes`, `sonner` | `[utils]`            |
+| `registry/index.json`         | —              | —                                     | —                                       | —（汇总索引）        |
 
 ---
 
@@ -824,6 +821,7 @@ feat: initial component library with 10 base components and Storybook demo
 ### 8.1 `README.md`
 
 章节结构（按顺序）：
+
 1. `# shadcn-ui-lib`（项目简介：技术栈堆叠）
 2. `## 技术栈`（10 项列表）
 3. `## 目录结构`（ASCII 树）
@@ -844,6 +842,7 @@ feat: initial component library with 10 base components and Storybook demo
 ### 8.2 `AGENTS.md`
 
 给未来 ZCode agents 的工作须知。章节结构：
+
 1. `# AGENTS.md — shadcn-ui-lib`
 2. `## 项目定位`（**对外发布的 shadcn registry 源**；选型表含 TS `^6.0.3`）
 3. `## 目录布局`（ASCII + 关键路径映射）
@@ -897,6 +896,7 @@ pnpm add -D vite@^8 @vitejs/plugin-react@^6 typescript@^6.0.3 \
 ### 阶段 3：配置文件（20 min）
 
 按第四节创建：
+
 - `tsconfig.json`、`tsconfig.app.json`、`tsconfig.node.json`
 - `vite.config.ts`、`eslint.config.js`
 - `index.html`、`components.json`
@@ -905,7 +905,7 @@ pnpm add -D vite@^8 @vitejs/plugin-react@^6 typescript@^6.0.3 \
 ### 阶段 4：源码骨架（15 min）
 
 - `src/main.tsx`、`src/App.tsx`、`src/vite-env.d.ts`
-- `src/index.css`（33 个 OKLCH 变量完整内容）
+- `src/global.css`（33 个 OKLCH 变量完整内容）
 - `src/lib/utils.ts`
 - `src/components/theme/theme-provider.tsx`
 
@@ -1005,15 +1005,15 @@ git push -u origin main
 
 ## 十一、风险与陷阱（必须知道的）
 
-| 风险 | 规避方式 |
-|---|---|
-| TypeScript 7 暂未兼容 typescript-eslint | **锁 `^6.0.3`，禁止升 v7**（typescript-eslint#10940） |
-| Storybook 10 没有 `addon-essentials` v10 兼容版 | 单独装 a11y + themes，**不要装** essentials |
-| `@vitejs/plugin-react` v6 底层是 OXC | 不要装 swc/oxc 变体；不要降 v5（与 Storybook 10 不匹配） |
-| shadcn CLI 默认装的 `cn` 包 | 必须 sed 替换为 `@/lib/utils`，并 `pnpm remove cn` |
-| shadcn CLI v4.7+ 用统一 `radix-ui` 包（**不是** `@radix-ui/react-*`） | 自动跟随，无需手动指定 |
-| `verbatimModuleSyntax: true` 下禁止 `React.CSSProperties` | sonner.tsx 必须显式 `import type { CSSProperties }` |
-| `package.json` 是 `"type": "module"` | CommonJS 脚本必须 `.cjs` 后缀 |
-| CI drift check 会拦截未同步的 registry | 改完组件立刻 `node scripts/generate-registry.cjs` 并 commit |
-| `shadcn registry add` 不会传染源端 `aliases` | 真正决定目录的是每个文件的 `files[].target` |
-| 不发 npm 包 | `"private": true` 保留；`pnpm release` 会拒绝发包 |
+| 风险                                                                  | 规避方式                                                    |
+| --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| TypeScript 7 暂未兼容 typescript-eslint                               | **锁 `^6.0.3`，禁止升 v7**（typescript-eslint#10940）       |
+| Storybook 10 没有 `addon-essentials` v10 兼容版                       | 单独装 a11y + themes，**不要装** essentials                 |
+| `@vitejs/plugin-react` v6 底层是 OXC                                  | 不要装 swc/oxc 变体；不要降 v5（与 Storybook 10 不匹配）    |
+| shadcn CLI 默认装的 `cn` 包                                           | 必须 sed 替换为 `@/lib/utils`，并 `pnpm remove cn`          |
+| shadcn CLI v4.7+ 用统一 `radix-ui` 包（**不是** `@radix-ui/react-*`） | 自动跟随，无需手动指定                                      |
+| `verbatimModuleSyntax: true` 下禁止 `React.CSSProperties`             | sonner.tsx 必须显式 `import type { CSSProperties }`         |
+| `package.json` 是 `"type": "module"`                                  | CommonJS 脚本必须 `.cjs` 后缀                               |
+| CI drift check 会拦截未同步的 registry                                | 改完组件立刻 `node scripts/generate-registry.cjs` 并 commit |
+| `shadcn registry add` 不会传染源端 `aliases`                          | 真正决定目录的是每个文件的 `files[].target`                 |
+| 不发 npm 包                                                           | `"private": true` 保留；`pnpm release` 会拒绝发包           |

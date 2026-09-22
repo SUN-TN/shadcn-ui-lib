@@ -51,7 +51,7 @@ React 19（函数组件）+ Vite 8（OXC，非 Babel/SWC）+ TypeScript 6 `stric
 
 ### 阶段 2：设计值 → 设计 token 映射（最关键的一步）
 
-**设计稿里的颜色不允许硬编码 hex 进组件**，必须映射到 `src/index.css` 既有语义 token：
+**设计稿里的颜色不允许硬编码 hex 进组件**，必须映射到 `src/global.css` 既有语义 token：
 
 | 设计稿色值 | 用途                          | token / 工具类                                    |
 | ---------- | ----------------------------- | ------------------------------------------------- |
@@ -65,12 +65,12 @@ React 19（函数组件）+ Vite 8（OXC，非 Babel/SWC）+ TypeScript 6 `stric
 | #FD2237    | 危险/删除                     | `destructive`                                     |
 | #3AD75C    | 成功                          | `success`                                         |
 | #FE660A    | 警告                          | `warning`                                         |
-| #00B2F8    | 信息                          | `info`                                            |
+| #999999    | 信息（与次要弱化文字同值）    | `info`（旧值 #00B2F8 已作废）                     |
 | #212C3C    | 遮罩/强调暗色                 | `ink`                                             |
 
 - 半透明档**不建 token**，用 Tailwind v4 透明度修饰符：`bg-primary/60`、`bg-success/20`、`bg-ink/60`
 - 设计稿颜色找不到对应 token 时：先选语义最接近的；确属品牌级偏差时**只能修改 `:root` 里现有 token 的值**，禁止新增 `--brand-*` / `--font-*` / `--neutral-*` 等非语义 token
-- 改 token 值时 sRGB → OKLCH 必须用脚本换算（线性化 → OKLab → 圆柱坐标），**禁止手抄近似值**；且改完 `src/index.css` 必须立即重跑 registry 脚本（见阶段 5）
+- 改 token 值时 sRGB → OKLCH 必须用脚本换算（线性化 → OKLab → 圆柱坐标），**禁止手抄近似值**；且改完 `src/global.css` 必须立即重跑 registry 脚本（见阶段 5）
 - 圆角用 `rounded-md/lg`（走 `--radius: 0.625rem` 阶梯），间距走 4px 基准的 Tailwind 刻度
 - `.dark` 是中性暗色基线，规范只定义亮色——**不要顺手改暗色**；组件只需保证暗色下不破样
 
@@ -122,7 +122,7 @@ React 19（函数组件）+ Vite 8（OXC，非 Babel/SWC）+ TypeScript 6 `stric
    - `registryDependencies` 含 utils、theme 及内部依赖的**绝对 GitHub raw URL**（由脚本自动生成）
    - 有动画类时含 `devDependencies: ["tw-animate-css"]`
 4. **禁止手编 `registry/*.json`**——脚本是唯一真源，手改会被下次生成覆盖
-5. 若阶段 2 改过 `src/index.css` 或 `src/components/theme/**`，确认 `theme*.json` 同步变化
+5. 若阶段 2 改过 `src/global.css` 或 `src/components/theme/**`，确认 `theme*.json` 同步变化
 
 ### 阶段 6：验证与视觉回归
 

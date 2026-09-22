@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react';
-import '../src/index.css';
+import '../src/global.css';
 import { ThemeProvider } from '../src/components/theme/theme-provider';
 import { Toaster } from '../src/shadcn-ui-lib/ui/sonner';
 import React from 'react';
@@ -8,7 +8,7 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="bg-background text-foreground min-h-screen p-6">
+        <div className="min-h-screen bg-background p-6 text-foreground">
           <Story />
           <Toaster richColors position="top-right" />
         </div>

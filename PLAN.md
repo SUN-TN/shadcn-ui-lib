@@ -7,22 +7,22 @@
 
 ## 一、目标与技术决策
 
-| 维度 | 选型 |
-|---|---|
-| 构建框架 | Vite 8 + React 19 + `@vitejs/plugin-react` v6+（底层已切到 OXC） |
-| 语言 | TypeScript v7（pre-release，启用 `erasableSyntaxOnly`） |
-| 样式 | Tailwind CSS v4（CSS-first，通过 `@tailwindcss/vite` 插件，无 `tailwind.config.ts`） |
-| UI 基础 | shadcn/ui（CLI 一次性脚本，按需 `pnpm dlx shadcn@latest add ...`） |
-| 主题 | `next-themes`（`attribute="class"`，light/dark/system）+ CSS 变量 |
-| 图标 | `lucide-react` |
-| 通知 | `sonner` |
-| 演示方案 | **Storybook v9+（`@storybook/react-vite`）**—— 行业事实标准 |
-| 工程化 | ESLint 9 flat config + Prettier 3 + `prettier-plugin-tailwindcss` + Husky + lint-staged |
-| 包管理 | pnpm 11.x，`engines.node >= 22` |
-| 版本管理 | `@changesets/cli` |
-| 路径别名 | `@/*` → `src/*`（vite / tsconfig / storybook 三端对齐） |
-| 首期组件 | Button、Input、Card、Dialog、Sheet、Dropdown-menu、Tabs、Toast(Sonner)、Select、Avatar |
-| 目标形态 | 组件库 + Storybook 演示站 + Changesets 工作流（可演进到 npm 发包） |
+| 维度     | 选型                                                                                    |
+| -------- | --------------------------------------------------------------------------------------- |
+| 构建框架 | Vite 8 + React 19 + `@vitejs/plugin-react` v6+（底层已切到 OXC）                        |
+| 语言     | TypeScript v7（pre-release，启用 `erasableSyntaxOnly`）                                 |
+| 样式     | Tailwind CSS v4（CSS-first，通过 `@tailwindcss/vite` 插件，无 `tailwind.config.ts`）    |
+| UI 基础  | shadcn/ui（CLI 一次性脚本，按需 `pnpm dlx shadcn@latest add ...`）                      |
+| 主题     | `next-themes`（`attribute="class"`，light/dark/system）+ CSS 变量                       |
+| 图标     | `lucide-react`                                                                          |
+| 通知     | `sonner`                                                                                |
+| 演示方案 | **Storybook v9+（`@storybook/react-vite`）**—— 行业事实标准                             |
+| 工程化   | ESLint 9 flat config + Prettier 3 + `prettier-plugin-tailwindcss` + Husky + lint-staged |
+| 包管理   | pnpm 11.x，`engines.node >= 22`                                                         |
+| 版本管理 | `@changesets/cli`                                                                       |
+| 路径别名 | `@/*` → `src/*`（vite / tsconfig / storybook 三端对齐）                                 |
+| 首期组件 | Button、Input、Card、Dialog、Sheet、Dropdown-menu、Tabs、Toast(Sonner)、Select、Avatar  |
+| 目标形态 | 组件库 + Storybook 演示站 + Changesets 工作流（可演进到 npm 发包）                      |
 
 > 与早期版本的差异：移除 `react-router`、移除自建演示站多页路由、移除 `@vitejs/plugin-react-swc` 与不存在的内置 `react-oxc`；统一以 `@vitejs/plugin-react` v6+（OXC 底层）作为唯一 React 插件。
 
@@ -42,7 +42,7 @@
 
 本质上是「开发期一次性脚本工具」，不会进入运行时，不写入 devDeps：
 
-1. **初始化项目配置**：`pnpm dlx shadcn@latest init` 生成 `components.json`，并把 Tailwind 主题变量写入 `src/index.css`、生成 `src/lib/utils.ts` 的 `cn()` 函数
+1. **初始化项目配置**：`pnpm dlx shadcn@latest init` 生成 `components.json`，并把 Tailwind 主题变量写入 `src/global.css`、生成 `src/lib/utils.ts` 的 `cn()` 函数
 2. **复制组件源码**：`pnpm dlx shadcn@latest add <name>` 把 `button.tsx` 等源码直接写到 `src/components/ui/` 下，并自动安装该组件依赖的 Radix 子包等
 3. **后续增量添加**：随时 `add` 新组件（Tooltip、Popover、Calendar 等）
 
@@ -65,7 +65,7 @@ shadcn-ui-lib/
 ├── .vscode/
 ├── public/
 ├── src/
-│   ├── index.css                     # Tailwind v4 入口 + 主题 CSS 变量
+│   ├── global.css                    # Tailwind v4 入口 + 主题 CSS 变量
 │   ├── vite-env.d.ts
 │   ├── lib/
 │   │   └── utils.ts                  # cn() 等
@@ -155,9 +155,9 @@ export default defineConfig({
     "esModuleInterop": true,
     "noEmit": true,
     "baseUrl": ".",
-    "paths": { "@/*": ["./src/*"] }
+    "paths": { "@/*": ["./src/*"] },
   },
-  "include": ["src"]
+  "include": ["src"],
 }
 ```
 
@@ -175,9 +175,9 @@ export default defineConfig({
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "include": ["vite.config.ts", ".storybook/**/*"]
+  "include": ["vite.config.ts", ".storybook/**/*"],
 }
 ```
 
@@ -186,17 +186,14 @@ export default defineConfig({
 ```jsonc
 {
   "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
 }
 ```
 
-### 5.5 `src/index.css`（Tailwind v4 CSS-first）
+### 5.5 `src/global.css`（Tailwind v4 CSS-first）
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -278,11 +275,7 @@ import type { StorybookConfig } from '@storybook/react-vite';
 const config: StorybookConfig = {
   framework: { name: '@storybook/react-vite', options: {} },
   stories: ['../src/**/*.stories.@(ts|tsx)'],
-  addons: [
-    '@storybook/addon-essentials',
-    '@storybook/addon-a11y',
-    '@storybook/addon-themes',
-  ],
+  addons: ['@storybook/addon-essentials', '@storybook/addon-a11y', '@storybook/addon-themes'],
   typescript: { check: false },
   docs: { autodocs: 'tag' },
 };
@@ -294,7 +287,7 @@ export default config;
 
 ```tsx
 import type { Preview } from '@storybook/react';
-import '../src/index.css';
+import '../src/global.css';
 import { ThemeProvider } from '../src/components/theme/theme-provider';
 import { Toaster } from '../src/components/ui/sonner';
 
@@ -302,7 +295,7 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="min-h-screen bg-background text-foreground p-6">
+        <div className="min-h-screen bg-background p-6 text-foreground">
           <Story />
           <Toaster richColors position="top-right" />
         </div>
@@ -387,7 +380,7 @@ export const Toaster = (props: ToasterProps) => {
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/index.css",
+    "css": "src/global.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -445,7 +438,7 @@ export default {
   singleQuote: true,
   printWidth: 100,
   plugins: ['prettier-plugin-tailwindcss'],
-  tailwindStylesheet: './src/index.css',
+  tailwindStylesheet: './src/global.css',
 };
 ```
 
@@ -474,7 +467,7 @@ export default {
 - 首个 changeset：`.changeset/initial.md`
   ```md
   ---
-  "@shadcn-ui-lib/core": minor
+  '@shadcn-ui-lib/core': minor
   ---
 
   feat: initial component library with 10 base components and Storybook demo
@@ -504,8 +497,8 @@ export default {
     "prepare": "husky || true",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
-  }
+    "release": "changeset publish",
+  },
 }
 ```
 
@@ -549,9 +542,9 @@ export default {
    - `.storybook/main.ts`、`.storybook/preview.tsx`
    - `index.html`、`src/vite-env.d.ts`、`src/main.tsx`
 5. **Tailwind v4 与主题**
-   - `src/index.css`（见 5.5）
+   - `src/global.css`（见 5.5）
 6. **shadcn 初始化与拉组件**
-   - `pnpm dlx shadcn@latest init`（生成 `components.json`、写入 `index.css`、生成 `src/lib/utils.ts`）
+   - `pnpm dlx shadcn@latest init`（生成 `components.json`、写入 `global.css`、生成 `src/lib/utils.ts`）
    - `pnpm dlx shadcn@latest add button input card dialog sheet dropdown-menu tabs select avatar sonner`
    - 若生成组件含 `enum` / `namespace`，按 TS 7 `erasableSyntaxOnly` 改写
 7. **Storybook 集成**

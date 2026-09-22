@@ -4,5 +4,5 @@ export default {
   singleQuote: true,
   printWidth: 100,
   plugins: ['prettier-plugin-tailwindcss'],
-  tailwindStylesheet: './src/index.css',
+  tailwindStylesheet: './src/global.css',
 };

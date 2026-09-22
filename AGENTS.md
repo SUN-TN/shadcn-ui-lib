@@ -32,7 +32,7 @@ src/
 ├── components/theme/        # next-themes 包装
 ├── lib/utils.ts             # re-exports `cn` from the `cn` package (registry:lib source)
 ├── App.tsx, main.tsx
-└── index.css               # Tailwind v4 主题变量
+└── global.css              # Tailwind v4 主题变量
 registry/                    # 发布用的 JSON（脚本生成，**勿手动编辑**）
 scripts/generate-registry.cjs
 .github/workflows/regen-registry.yml   # CI drift check
@@ -73,9 +73,9 @@ scripts/generate-registry.cjs
 
 ## 色彩 token 的分发（registry:theme）
 
-设计规范不能只停在 `src/index.css`，必须变成可安装的 registry 项，业务项目才会自动用上。
+设计规范不能只停在 `src/global.css`，必须变成可安装的 registry 项，业务项目才会自动用上。
 
-脚本 `generate-registry.cjs` 会解析 `src/index.css` 生成三个项（`src/index.css` 是唯一真源，**不要**手编这几个 JSON）：
+脚本 `generate-registry.cjs` 会解析 `src/global.css` 生成三个项（`src/global.css` 是唯一真源，**不要**手编这几个 JSON）：
 
 - `theme`（`registry:theme`，自动随每个组件安装）
   - `:root` → `cssVars.light` → CLI 写入业务项目的 `:root`
@@ -86,7 +86,7 @@ scripts/generate-registry.cjs
 
 `theme` 被写进每个 UI 组件的 `registryDependencies`，所以 `add @shadcn-ui-lib/<name>` 会自动 upsert token（CLI 对 `registry:theme` 置 `overwriteCssVars: true`，会覆盖业务 `:root` 里的同名变量——这是"自动生效"的开关，也是要在 README 里写明的副作用）。
 
-**改了 `src/index.css` 必须**立刻 `node scripts/generate-registry.cjs` 并 commit `registry/`；CI 已把 `src/index.css`、`src/components/theme/**` 加入 drift check 触发路径。
+**改了 `src/global.css` 必须**立刻 `node scripts/generate-registry.cjs` 并 commit `registry/`；CI 已把 `src/global.css`、`src/components/theme/**` 加入 drift check 触发路径。
 
 用 `--color-*` 映射走 `css["@theme inline"]` 而不是 `cssVars.theme`：后者依赖 CLI 对颜色值自动补 `--color-` 前缀的行为（不同版本不一致，可能生成 `--color-color-success`），`css` 段是逐字写入、行为确定。
 
@@ -126,10 +126,11 @@ shadcn CLI 的路径解析机制：
 
 ## 色彩 token（语义化，勿造新 token）
 
-UI/UX 颜色设计规范已全部落在 `src/index.css` 的 shadcn 现有语义 token 上（OKLCH 格式）：
+UI/UX 颜色设计规范已全部落在 `src/global.css` 的 shadcn 现有语义 token 上（OKLCH 格式）：
 
 - **改颜色只改 `:root` 里现有 token 的值**，不要新增 `--brand-*` / `--font-*` / `--neutral-*` / `--aux-*` 之类的非语义 token
-- 仅有 4 个补充 token：`--success`（#3AD75C）、`--warning`（#FE660A）、`--info`（#00B2F8）、`--ink`（#212C3C，遮罩/强调）
+- 仅有 4 个补充 token：`--success`（#3AD75C）、`--warning`（#FE660A）、`--info`（#999999）、`--ink`（#212C3C，遮罩/强调）
+- `--info` 于 2026-09-22 由 #00B2F8 改为 **#999999**，与 `--subtle-foreground` 同值；飞书《CSS Token 映射表 V1》已同步。**旧值 #00B2F8 作废**，任何文档中出现一律按 #999999 纠正（`--chart-2` 仍为 #00B2F8，不受影响）
 - 辅助色的 60% / 20% 透明档**不建 token**——用 Tailwind v4 透明度修饰符：`bg-primary/60`、`bg-success/20`、`bg-ink/60`
 - `.dark` 段是中性 oklch 基线（规范只定义亮色），**不要**顺手改暗色
 - 明度阶梯约定：交互面 `#F0F0F0`(0.955) < 页面 `#F2F4F8`(0.967) < 模块/卡片 `#F5F5F5`(0.970)

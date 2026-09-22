@@ -4,6 +4,8 @@
 > https://kcnq8ppkkxh2.feishu.cn/wiki/N8CUw90lViYpmPkbuVrc8675nsf
 >
 > 本文件为离线快照，V2 发布时同步更新。组件契约文档中的 Token 表三列（figma 变量名 / tailwind 工具类 / 对应的 css 值）须与本表一致。
+>
+> ✅ 2026-09-22 同步：`color/status/info` 在飞书文档与本项目 `src/global.css` 已统一为 **#999999**（oklch(0.682 0 0)），与 `color/text/subtle` 同值。旧的 #00B2F8（信息蓝）已作废，历史契约文档里若出现 #00B2F8 视为过期值。
 
 ## 一、基础表面与文字
 
@@ -38,7 +40,7 @@
 | color/status/destructive-foreground | text-destructive-foreground       | oklch(0.985 0 0)              | #FCFCFC |
 | color/status/success                | bg-success / text-success         | oklch(0.7735 0.2095 146.6446) | #3AD75C |
 | color/status/warning                | bg-warning / text-warning         | oklch(0.6945 0.2026 43.1038)  | #FE660A |
-| color/status/info                   | bg-info / text-info               | oklch(0.722 0.155 235.785)    | #00B2F8 |
+| color/status/info                   | bg-info / text-info               | oklch(0.682 0 0)              | #999999 |
 | color/status/disabled               | bg-disabled / text-disabled       | oklch(0.885 0 0)              | #D9D9D9 |
 | color/ink                           | bg-ink / text-ink                 | oklch(0.29 0.033 257.673)     | #212C3C |
 
@@ -65,13 +67,13 @@
 
 ## 八、字体与行高（text）
 
-| figma 变量名     | tailwind 工具类  | 对应的 css 值      | 行高 |
-| ---------------- | ---------------- | ------------------ | ---- |
-| text/title-lg    | text-title-lg    | 18px               | 1.5  |
-| text/title-md    | text-title-md    | calc(0.625rem-4px) | 1.5  |
-| text/body-strong | text-body-strong | calc(0.625rem-2px) | 1.5  |
-| text/body        | text-body        | 0.625rem           | 1.5  |
-| text/caption     | text-caption     | calc(0.625rem+4px) | 1.5  |
+| figma 变量名     | tailwind 工具类  | 对应的 css 值 | 行高 |
+| ---------------- | ---------------- | ------------- | ---- |
+| text/title-lg    | text-title-lg    | 18px          | 1.5  |
+| text/title-md    | text-title-md    | 16px          | 1.5  |
+| text/body-strong | text-body-strong | 16px          | 1.5  |
+| text/body        | text-body        | 14px          | 1.5  |
+| text/caption     | text-caption     | 12px          | 1.5  |
 
 > 注：V1 中 body 字号 css 变量名为 `--text-body`，body-strong 为 `--text-body-storng`（原文拼写，沿用即可）。
 

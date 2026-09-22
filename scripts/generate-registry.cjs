@@ -51,7 +51,7 @@ const ITEM_URL = (name) => `${REGISTRY_BASE}/${name}.json`;
 
 const AUTHOR = 'SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)';
 const DOCS_URL = 'https://github.com/SUN-TN/shadcn-ui-lib';
-const THEME_SOURCE_PATH = path.join(ROOT, 'src/index.css');
+const THEME_SOURCE_PATH = path.join(ROOT, 'src/global.css');
 const THEME_PROVIDER_SOURCE_PATH = path.join(ROOT, 'src/components/theme/theme-provider.tsx');
 
 if (!fs.existsSync(outDir)) {
@@ -59,7 +59,7 @@ if (!fs.existsSync(outDir)) {
 }
 
 /**
- * 读取 src/index.css，拆成 registry:theme 需要的三段：
+ * 读取 src/global.css，拆成 registry:theme 需要的三段：
  *   - light  → cssVars.light（CLI 写入 :root）
  *   - dark   → cssVars.dark （CLI 写入 .dark）
  *   - theme  → css["@theme inline"]（CLI 逐字写入，不依赖 CLI 对 cssVars.theme 的 --color- 前缀推断）
@@ -67,7 +67,7 @@ if (!fs.existsSync(outDir)) {
 function parseThemeSource(css) {
   const stripped = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
-  // 按选择器/at-rule 头定位块体，做花括号配对（index.css 的这三段都没有嵌套块）
+  // 按选择器/at-rule 头定位块体，做花括号配对（global.css 的这三段都没有嵌套块）
   function readBlock(headerRe) {
     const m = headerRe.exec(stripped);
     if (!m) return null;
@@ -107,9 +107,9 @@ function parseThemeSource(css) {
   const darkBlock = readBlock(/(^|\n)\.dark\s*\{/);
   const themeBlock = readBlock(/(^|\n)@theme\s+inline\s*\{/);
 
-  if (!rootBlock) throw new Error('src/index.css 里找不到 :root 块');
-  if (!darkBlock) throw new Error('src/index.css 里找不到 .dark 块');
-  if (!themeBlock) throw new Error('src/index.css 里找不到 @theme inline 块');
+  if (!rootBlock) throw new Error('src/global.css 里找不到 :root 块');
+  if (!darkBlock) throw new Error('src/global.css 里找不到 .dark 块');
+  if (!themeBlock) throw new Error('src/global.css 里找不到 @theme inline 块');
 
   return { light: varsBare(rootBlock), dark: varsBare(darkBlock), theme: varsWithDash(themeBlock) };
 }
@@ -224,7 +224,7 @@ fs.writeFileSync(path.join(outDir, 'utils.json'), JSON.stringify(utilsItem, null
 items.unshift({ name: 'utils', title: 'cn utility', description: utilsItem.description });
 console.log(`✓ utils.json  (deps: cn)`);
 
-// ---- theme 注册表项（色彩 token，由 src/index.css 生成）----
+// ---- theme 注册表项（色彩 token，由 src/global.css 生成）----
 // CLI 行为（Tailwind v4 管线）：
 //   cssVars.light → 写入 :root；cssVars.dark → 写入 .dark
 //   css["@theme inline"] → 逐字写入 @theme inline
