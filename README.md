@@ -183,7 +183,7 @@ shadcn add @shadcn-ui-lib/button
 shadcn add @shadcn-ui-lib/dialog
 # CLI 会自动：
 #   - 拉 dialog.json + button.json + utils.json + theme.json（registryDependencies）
-#   - 安装 npm 依赖：radix-ui、lucide-react、cn、class-variance-authority、tw-animate-css
+#   - 安装 npm 依赖：@base-ui/react、lucide-react、cn、class-variance-authority、tw-animate-css
 #   - 写入 <aliases.ui>/shadcn-ui-lib/{button,dialog}.tsx + <aliases.lib>/utils.ts
 #   - 把色彩 token upsert 到用户项目的 CSS（:root + @theme inline）
 ```

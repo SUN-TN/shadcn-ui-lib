@@ -15,7 +15,6 @@ const meta = {
       control: 'select',
       options: ['default', 'xs', 'sm', 'lg', 'icon', 'icon-xs', 'icon-sm', 'icon-lg'],
     },
-    asChild: { control: 'boolean' },
     disabled: { control: 'boolean' },
   },
   args: {
@@ -36,5 +35,11 @@ export const Ghost: Story = { args: { variant: 'ghost', children: 'Ghost' } };
 export const Link: Story = { args: { variant: 'link', children: 'Link' } };
 export const Disabled: Story = { args: { disabled: true, children: 'Disabled' } };
 export const WithIcon: Story = {
-  args: { children: <>Send email <MailIcon className="size-4" /></> },
+  args: {
+    children: (
+      <>
+        Send email <MailIcon className="size-4" />
+      </>
+    ),
+  },
 };

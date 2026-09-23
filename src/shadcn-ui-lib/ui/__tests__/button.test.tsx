@@ -38,12 +38,8 @@ describe('Button', () => {
     expect(btn.className).not.toContain('px-4');
   });
 
-  it('asChild 时把样式与属性合并到子元素，不再渲染 button', () => {
-    render(
-      <Button asChild>
-        <a href="/x">链接</a>
-      </Button>,
-    );
+  it('render 时把样式与属性合并到子元素，不再渲染 button', () => {
+    render(<Button render={<a href="/x">链接</a>} />);
     const link = screen.getByRole('link', { name: '链接' });
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();

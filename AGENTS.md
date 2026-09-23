@@ -18,7 +18,7 @@
 | 演示     | Storybook 10 + `@storybook/react-vite`（addons：`@storybook/addon-a11y`、`@storybook/addon-themes`、`@storybook/addon-vitest`，**未装 `addon-essentials`**，因 SB10 无对应 v10 发布） |
 | 测试     | Vitest **4.1.11**（钉版不升 5.x）+ jsdom + `@storybook/addon-vitest`（Vitest browser mode + Playwright Chromium）                                                                     |
 | 主题     | `next-themes` + CSS 变量（light/dark/system）                                                                                                                                         |
-| Radix    | **统一包 `radix-ui`**，不再按 `@radix-ui/react-*` 拆分（shadcn CLI v4.7+ 默认）                                                                                                       |
+| 无头库   | **Base UI**（`@base-ui/react`，MUI 官方；稳定版 `1.0.0` 起，当前 `1.8.0`）——替代原 `radix-ui`；`Button` 用原生 `render` prop 组合（`asChild` 已移除）                                 |
 | 版本管理 | `@changesets/cli`                                                                                                                                                                     |
 
 ---
@@ -96,7 +96,7 @@ scripts/generate-registry.cjs
 ### 关键约束（踩过的坑）
 
 1. **`tsconfig.node.json` 必须包含 `vitest.config.ts` 与 `scripts/**/*.ts`**，并开 `allowImportingTsExtensions: true`——Vite 8 native config loader 要求 import 带 `.ts` 扩展名，否则会刷告警
-2. **jsdom 缺 `matchMedia` / `ResizeObserver` / `DOMRect` / `hasPointerCapture` / `scrollIntoView` / `PointerEvent`**——`src/test/setup.ts` 必须 polyfill 这些（next-themes 与 Radix Select/Dialog/DropdownMenu 依赖）。browser mode 不需要这套 polyfill
+2. **jsdom 缺 `matchMedia` / `ResizeObserver` / `DOMRect` / `hasPointerCapture` / `scrollIntoView` / `PointerEvent`**——`src/test/setup.ts` 必须 polyfill 这些（next-themes 与 Base UI 组件依赖）。browser mode 不需要这套 polyfill
 3. **测试文件绝不能放 `src/shadcn-ui-lib/ui/` 顶层**——`generate-registry.cjs` 会用 `readdirSync(srcDir).filter(f => f.endsWith('.tsx'))` 扫顶层文件，把 `button.test.tsx` 当成组件生成 `button.test.json` 并污染 `index.json`。一律放子目录：`scripts/__tests__/` 或 `src/**/__tests__/`
 4. **`@testing-library/dom` 必须显式装**——RTL 的必需 peer，`shamefully-hoist=false` 下根目录不可解析 storybook 内部已装的 10.4.x，不装则 `import { ... } from '@testing-library/react'` 直接 `Cannot find module`
 5. **RTL 自动 cleanup 不生效**——本项目 `globals: false`（避免往 `tsconfig.app.json` 塞 `types: ["vitest/globals"]` 污染 app 配置），已在 `src/test/setup.ts` 手动 `afterEach(cleanup)`
@@ -112,7 +112,7 @@ import { expect, screen, userEvent, within } from 'storybook/test';
 
 它导出 `expect / screen / userEvent / within / fn / waitFor` 等全部所需标识符，且**不带 `pretty-format@27`**（这是与 `@storybook/test@8` 的关键差异——见下方浏览器兼容项）。
 
-play 函数注意点：Radix Dialog/Tooltip 等会把内容 portal 到 `document.body`，需用 `screen`（全局查询）而非 `canvas` / `within(canvasElement)`。
+play 函数注意点：Base UI Dialog/Popover 等会把内容 portal 到 `document.body`，需用 `screen`（全局查询）而非 `canvas` / `within(canvasElement)`。
 
 ### browser mode 兼容项（`pretty-format@27` 修复）
 
