@@ -1,6 +1,6 @@
 # AGENTS.md — shadcn-ui-lib
 
-面向未来 ZCode agents 的项目工作须知。先读本文件再动手改代码。
+面向未来 agents 的项目工作须知。先读本文件再动手改代码。
 
 ---
 
@@ -8,17 +8,18 @@
 
 **shadcn-ui-lib** 是一个**对外发布的 shadcn registry 源**——以 GitHub 为分发通道，把组件作为源码 JSON 通过 `shadcn@latest add @shadcn-ui-lib/<name>` 安装到下游项目。不是普通前端项目，是组件库+registry的分发端。
 
-| 维度     | 选型                                                                                                                                                  |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 远程     | `git@github.com:SUN-TN/shadcn-ui-lib.git`（默认分支 `main`，公开）                                                                                    |
-| Runtime  | Node ≥ 22 + pnpm 11.10                                                                                                                                |
-| 构建     | Vite 8 + `@vitejs/plugin-react@^6`（底层 OXC，**非 SWC、非 Babel**）                                                                                  |
-| 语言     | **TypeScript `^6.0.3`**（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）——见下方"为什么用 v6 不升 v7"                                    |
-| 样式     | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**没有 `tailwind.config`**）                                                                        |
-| 演示     | Storybook 10 + `@storybook/react-vite`（仅 `@storybook/addon-a11y`、`@storybook/addon-themes`，**未装 `addon-essentials`**，因 SB10 无对应 v10 发布） |
-| 主题     | `next-themes` + CSS 变量（light/dark/system）                                                                                                         |
-| Radix    | **统一包 `radix-ui`**，不再按 `@radix-ui/react-*` 拆分（shadcn CLI v4.7+ 默认）                                                                       |
-| 版本管理 | `@changesets/cli`                                                                                                                                     |
+| 维度     | 选型                                                                                                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 远程     | `git@github.com:SUN-TN/shadcn-ui-lib.git`（默认分支 `main`，公开）                                                                                                                    |
+| Runtime  | Node ≥ 22 + pnpm 11.10                                                                                                                                                                |
+| 构建     | Vite 8 + `@vitejs/plugin-react@^6`（底层 OXC，**非 SWC、非 Babel**）                                                                                                                  |
+| 语言     | **TypeScript `^6.0.3`**（`strict + verbatimModuleSyntax + noUncheckedIndexedAccess`）——见下方"为什么用 v6 不升 v7"                                                                    |
+| 样式     | Tailwind v4（CSS-first，通过 `@tailwindcss/vite`，**没有 `tailwind.config`**）                                                                                                        |
+| 演示     | Storybook 10 + `@storybook/react-vite`（addons：`@storybook/addon-a11y`、`@storybook/addon-themes`、`@storybook/addon-vitest`，**未装 `addon-essentials`**，因 SB10 无对应 v10 发布） |
+| 测试     | Vitest **4.1.11**（钉版不升 5.x）+ jsdom + `@storybook/addon-vitest`（Vitest browser mode + Playwright Chromium）                                                                     |
+| 主题     | `next-themes` + CSS 变量（light/dark/system）                                                                                                                                         |
+| Radix    | **统一包 `radix-ui`**，不再按 `@radix-ui/react-*` 拆分（shadcn CLI v4.7+ 默认）                                                                                                       |
+| 版本管理 | `@changesets/cli`                                                                                                                                                                     |
 
 ---
 
@@ -49,15 +50,89 @@ scripts/generate-registry.cjs
 
 ## 命令
 
-| 命令                                 | 用途                                                  |
-| ------------------------------------ | ----------------------------------------------------- |
-| `pnpm dev`                           | 启动 Storybook（http://localhost:6006）               |
-| `pnpm typecheck`                     | `tsc -b --noEmit`                                     |
-| `pnpm lint`                          | ESLint（0 errors，2 个 Fast Refresh warning 为已知）  |
-| `pnpm build`                         | `tsc -b && vite build`（产出 `dist/`）                |
-| `pnpm build-storybook`               | 产出 `storybook-static/`                              |
-| `node scripts/generate-registry.cjs` | 从 `src/shadcn-ui-lib/ui/` 重新生成 `registry/*.json` |
-| `pnpm changeset`                     | 新建 changeset                                        |
+| 命令                                 | 用途                                                               |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| `pnpm dev`                           | 启动 Storybook（http://localhost:6006）                            |
+| `pnpm typecheck`                     | `tsc -b --noEmit`                                                  |
+| `pnpm lint`                          | ESLint（0 errors，2 个 Fast Refresh warning 为已知）               |
+| `pnpm build`                         | `tsc -b && vite build`（产出 `dist/`）                             |
+| `pnpm build-storybook`               | 产出 `storybook-static/`                                           |
+| `pnpm test`                          | Vitest 跑 node + jsdom 两个 project（脚本显式排除 storybook）      |
+| `pnpm test:watch`                    | 同上，watch 模式                                                   |
+| `pnpm coverage`                      | 同上 + V8 coverage                                                 |
+| `pnpm test-storybook`                | 跑 Storybook story（Vitest browser mode + Chromium，需先装浏览器） |
+| `node scripts/generate-registry.cjs` | 从 `src/shadcn-ui-lib/ui/` 重新生成 `registry/*.json`              |
+| `pnpm changeset`                     | 新建 changeset                                                     |
+
+---
+
+## 测试栈
+
+### 三层测试架构
+
+| 层         | 工具                                                                    | 用途                                                                 | 入口                  |
+| ---------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------- |
+| 契约       | `scripts/__tests__/registry-contract.test.ts`（Vitest node project）    | 验证 `generate-registry.cjs` 产出符合分发契约（A1–A11 共 11 条断言） | `pnpm test`           |
+| 组件行为   | `src/**/*.test.{ts,tsx}`（Vitest jsdom project + RTL）                  | 验证组件 props/状态/事件透传                                         | `pnpm test`           |
+| Story 交互 | `src/**/*.stories.tsx` 的 `play` 函数（Vitest browser mode + Chromium） | 端到端模拟用户操作并断言                                             | `pnpm test-storybook` |
+
+### 版本钉（硬约束）
+
+- **Vitest 钉 `4.1.11`**——不能升 5.x。原因：`@storybook/addon-vitest@10.6.0` 的 peer 只到 `vitest ^3 || ^4`；升 5.x 会直接 install 失败。
+- `@vitest/coverage-v8` 必须与 `vitest` **精确同版本**（peer 限定）
+- `@vitest/browser-playwright` 必须与 `vitest` **精确同版本**
+- `@playwright/test` 与 `chromium` 浏览器二进制：`pnpm install` 只装包，不下载浏览器，需手动 `pnpm exec playwright install chromium`（macOS 不加 `--with-deps`，仅 Linux CI 用）
+
+### Vitest 配置结构（`vitest.config.ts`）
+
+`projects` 数组下三个 project，每个都 `extends: true`（Vitest 4 inline project 默认 `extends: false`，必须显式打开才能继承 `@` 别名与 react/tailwind 插件）：
+
+- `node`：`environment: 'node'`，只匹配 `scripts/__tests__/**/*.test.ts`
+- `jsdom`：`setupFiles: ['./src/test/setup.ts']`，匹配 `src/**/*.test.{ts,tsx}`
+- `storybook`：`browser.enabled: true` + `provider: playwright({})` + `headless: true` + `instances: [{ browser: 'chromium' }]` + `plugins: [storybookTest({ configDir, storybookScript: 'storybook dev --no-open' })]` + `setupFiles: ['./.storybook/vitest.setup.ts']`
+
+`coverage` / reporters 只能写在根级 `test` 配置里，放进 project 无效。
+
+### 关键约束（踩过的坑）
+
+1. **`tsconfig.node.json` 必须包含 `vitest.config.ts` 与 `scripts/**/*.ts`**，并开 `allowImportingTsExtensions: true`——Vite 8 native config loader 要求 import 带 `.ts` 扩展名，否则会刷告警
+2. **jsdom 缺 `matchMedia` / `ResizeObserver` / `DOMRect` / `hasPointerCapture` / `scrollIntoView` / `PointerEvent`**——`src/test/setup.ts` 必须 polyfill 这些（next-themes 与 Radix Select/Dialog/DropdownMenu 依赖）。browser mode 不需要这套 polyfill
+3. **测试文件绝不能放 `src/shadcn-ui-lib/ui/` 顶层**——`generate-registry.cjs` 会用 `readdirSync(srcDir).filter(f => f.endsWith('.tsx'))` 扫顶层文件，把 `button.test.tsx` 当成组件生成 `button.test.json` 并污染 `index.json`。一律放子目录：`scripts/__tests__/` 或 `src/**/__tests__/`
+4. **`@testing-library/dom` 必须显式装**——RTL 的必需 peer，`shamefully-hoist=false` 下根目录不可解析 storybook 内部已装的 10.4.x，不装则 `import { ... } from '@testing-library/react'` 直接 `Cannot find module`
+5. **RTL 自动 cleanup 不生效**——本项目 `globals: false`（避免往 `tsconfig.app.json` 塞 `types: ["vitest/globals"]` 污染 app 配置），已在 `src/test/setup.ts` 手动 `afterEach(cleanup)`
+6. **`@testing-library/jest-dom@7` 用 `/vitest` 入口**：`import '@testing-library/jest-dom/vitest'`
+
+### Storybook story 的 play 函数（`src/**/*.stories.tsx`）
+
+import 源必须是 **`storybook/test`**（无 `@` 作用域，由 `storybook@10.6.0` 通过 `storybook/test` 子路径提供），不要装 `@storybook/test@8`：
+
+```ts
+import { expect, screen, userEvent, within } from 'storybook/test';
+```
+
+它导出 `expect / screen / userEvent / within / fn / waitFor` 等全部所需标识符，且**不带 `pretty-format@27`**（这是与 `@storybook/test@8` 的关键差异——见下方浏览器兼容项）。
+
+play 函数注意点：Radix Dialog/Tooltip 等会把内容 portal 到 `document.body`，需用 `screen`（全局查询）而非 `canvas` / `within(canvasElement)`。
+
+### browser mode 兼容项（`pretty-format@27` 修复）
+
+`@testing-library/dom@10.4.2`（direct devDep）transitively 依赖 `pretty-format@27.0.2`，其 `AsymmetricMatcher.js:10` 在模块顶层引用裸 `global`：
+
+```js
+var Symbol = global['jest-symbol-do-not-touch'] || global.Symbol;
+```
+
+浏览器环境无 `global`，导致 `ReferenceError: global is not defined`。**解法**：`vitest.config.ts` 根级加 Vite `define`：
+
+```ts
+define: {
+  global: 'globalThis',
+},
+```
+
+Vite transform 阶段把裸 `global` 替换为跨环境标准的 `globalThis`（Node.js 中 `globalThis === global`，无副作用；浏览器中 `globalThis` 是 ECMAScript 标准全局对象）。
+
+这条**不能去掉**——`pretty-format@27` 是 RTL 的传递依赖，必须让它在浏览器里能跑。治标，不除根（根是旧包本身无法替换）。
 
 ---
 
@@ -136,7 +211,9 @@ UI/UX 颜色设计规范已全部落在 `src/global.css` 的 shadcn 现有语义
 - 明度阶梯约定：交互面 `#F0F0F0`(0.955) < 页面 `#F2F4F8`(0.967) < 模块/卡片 `#F5F5F5`(0.970)
 - 换算新色值时用脚本算 OKLCH（sRGB→OKLab 数学），**不要**手抄近似值
 
-## CI 约束（`.github/workflows/regen-registry.yml`）
+## CI 约束
+
+### `regen-registry.yml`（registry drift check）
 
 任何 push 到 `main` 或 PR 修改 `src/shadcn-ui-lib/ui/**`、`src/lib/**`、`scripts/generate-registry.cjs` 都会触发：
 
@@ -145,6 +222,19 @@ UI/UX 颜色设计规范已全部落在 `src/global.css` 的 shadcn 现有语义
 3. 有改动 → CI fail，提示"registry/ is out of sync"
 
 **开发流程铁律**：改完组件源码立刻跑一次 `node scripts/generate-registry.cjs` 并 commit `registry/`——否则 PR 会失败。
+
+### `test.yml`（测试闸门）
+
+5 个 job 并行（`lint` / `typecheck` / `test` / `build` / `storybook-test`），node 24，`pnpm/action-setup@v4` + `cache: pnpm`，`paths-ignore: ['**/*.md']`。
+
+- `test` job：跑 `pnpm test`（node + jsdom project）
+- `storybook-test` job：先 `pnpm exec playwright install --with-deps chromium`（CI 是 Ubuntu 必须装系统依赖），再 `pnpm test-storybook`
+- coverage 作为 artifact 上传，**无 threshold**（组件覆盖率从 0 起步，不卡门）
+
+### 本地分支运行注意事项
+
+- 本沙箱跑 `pnpm add` / `pnpm install`（非 frozen）会被文件代理层拦，依赖装完后**必须**在自己终端跑一次 `pnpm install` 恢复正常链接
+- 本沙箱跑 `eslint` / `tsc -p tsconfig.app.json` 会被 SIGTERM（exit 137），无法本地验证 lint 与 app typecheck，验证优先用 `pnpm test`
 
 ---
 
@@ -165,7 +255,7 @@ UI/UX 颜色设计规范已全部落在 `src/global.css` 的 shadcn 现有语义
 - 不要在 `dependencies` 数组里加 `react` / `react-dom`——脚本有 `KNOWN_PEERS` 过滤
 - `package.json` 是 `"type": "module"`——CommonJS 脚本必须 `.cjs` 后缀
 - `@vitejs/plugin-react@^6` 底层是 OXC，**不要**加 `@vitejs/plugin-react-swc`、`@vitejs/plugin-react-oxc` 等
-- Storybook v10 不再提供 `addon-essentials` v10 兼容版——只能单独装 a11y/themes
+- Storybook v10 不再提供 `addon-essentials` v10 兼容版——只能单独装 `a11y` / `themes` / `vitest`
 
 ---
 
@@ -178,3 +268,7 @@ UI/UX 颜色设计规范已全部落在 `src/global.css` 的 shadcn 现有语义
 - ❌ 把 `@vitejs/plugin-react` 降级到 v5（依赖 Storybook 10 与 v6 配套）
 - ❌ 在 `pnpm release` 前去掉 `"private": true`（当前不需要发布 npm 包）
 - ❌ 重新安装 `clsx` 或 `tailwind-merge`——`cn` 已完全替代，registry 也只声明 `cn`
+- ❌ 把 Vitest 升到 5.x——`@storybook/addon-vitest@10.6.0` 的 peer 只到 `vitest ^3 || ^4`
+- ❌ story 的 play 函数从 `@storybook/test@8` import——它是 SB8 旧包，依赖图里带 `pretty-format@27`，在 browser mode 中因裸 `global` 引用崩；改用 `storybook/test`
+- ❌ 把测试文件放 `src/shadcn-ui-lib/ui/` 顶层（`generate-registry.cjs` 会当成组件生成 `button.test.json` 污染 index.json）；放 `scripts/__tests__/` 或 `src/**/__tests__/`
+- ❌ 删 `vitest.config.ts` 里的 `define: { global: 'globalThis' }`——它是 `pretty-format@27` 在 browser mode 下不崩的关键
