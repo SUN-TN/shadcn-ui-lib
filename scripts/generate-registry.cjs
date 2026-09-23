@@ -25,14 +25,6 @@ const outDir = path.join(ROOT, 'registry');
 const meta = {
   button: { title: 'Button', description: 'Displays a button or a component that looks like a button.' },
   input: { title: 'Input', description: 'A native HTML input element, styled with Tailwind CSS.' },
-  card: { title: 'Card', description: 'Displays a card with header, content, and footer.' },
-  dialog: { title: 'Dialog', description: 'A window overlaid on the primary content.' },
-  sheet: { title: 'Sheet', description: 'A side panel that slides in from the edge of the screen.' },
-  'dropdown-menu': { title: 'Dropdown Menu', description: 'Displays a menu to the user — such as a set of actions or functions.' },
-  tabs: { title: 'Tabs', description: 'A set of layered sections of content — known as tab panels.' },
-  select: { title: 'Select', description: 'Displays a list of options for the user to pick from.' },
-  avatar: { title: 'Avatar', description: 'An image element with a fallback for loading and error states.' },
-  sonner: { title: 'Sonner (Toaster)', description: 'A toast notification component built on top of sonner.' },
 };
 
 // 用户项目通常已经安装的运行时包，不作为 dependencies

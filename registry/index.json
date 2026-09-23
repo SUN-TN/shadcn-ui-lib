@@ -19,54 +19,14 @@
       "description": "Class name merge utility (clsx + tailwind-merge)."
     },
     {
-      "name": "avatar",
-      "title": "Avatar",
-      "description": "An image element with a fallback for loading and error states."
-    },
-    {
       "name": "button",
       "title": "Button",
       "description": "Displays a button or a component that looks like a button."
     },
     {
-      "name": "card",
-      "title": "Card",
-      "description": "Displays a card with header, content, and footer."
-    },
-    {
-      "name": "dialog",
-      "title": "Dialog",
-      "description": "A window overlaid on the primary content."
-    },
-    {
-      "name": "dropdown-menu",
-      "title": "Dropdown Menu",
-      "description": "Displays a menu to the user — such as a set of actions or functions."
-    },
-    {
       "name": "input",
       "title": "Input",
       "description": "A native HTML input element, styled with Tailwind CSS."
-    },
-    {
-      "name": "select",
-      "title": "Select",
-      "description": "Displays a list of options for the user to pick from."
-    },
-    {
-      "name": "sheet",
-      "title": "Sheet",
-      "description": "A side panel that slides in from the edge of the screen."
-    },
-    {
-      "name": "sonner",
-      "title": "Sonner (Toaster)",
-      "description": "A toast notification component built on top of sonner."
-    },
-    {
-      "name": "tabs",
-      "title": "Tabs",
-      "description": "A set of layered sections of content — known as tab panels."
     },
     {
       "name": "theme-dark",
