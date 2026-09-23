@@ -22,7 +22,7 @@ description: 'Design and author component API contracts for UI components (Feish
 
 ## 何时触发
 
-- **设计模式**（默认）：用户提供 API 契约模板 + CSS Token 映射表 + 组件名，要求"完善 API 契约"；用户说"参考 AntD / Radix / shadcn 的 X 组件设计"
+- **设计模式**（默认）：用户提供 API 契约模板 + CSS Token 映射表 + 组件名，要求"完善 API 契约"；用户说"参考 AntD / Base UI / shadcn 的 X 组件设计"
 - **反推模式**：用户显式要求"读源码" / "基于现有组件反推" / "参考这个组件的实现"
 - **审查模式**：用户提供已有契约文档，要求"检查错漏 / 一致性 / 冲突"
 - **Token 表查检**：文档涉及 CSS Token 映射表格（figma 变量名 / tailwind 工具类 / 对应的 css 值 三列）的编写或核对的规则（R1–R4）
@@ -33,12 +33,12 @@ description: 'Design and author component API contracts for UI components (Feish
 
 ### 设计模式（默认）
 
-| 资源                 | 获取方式                           | 是否必需 | 用途                                                             |
-| -------------------- | ---------------------------------- | -------- | ---------------------------------------------------------------- |
-| **API 契约模板**     | 飞书 Wiki URL                      | ✅       | 章节结构、表格列定义（**不要擅自改格式！**）                     |
-| **CSS Token 映射表** | 飞书 Wiki URL                      | ✅       | Token 名称 ↔ HEX/OKLCH 值的**唯一真值来源**（R2）                |
-| **参考库设计**       | AntD / Radix / MUI / shadcn 等 URL | 建议提供 | 设计模式选型（variant 枚举、size 阶梯、loading/color prop 形态） |
-| **需求描述**         | 用户口头/文字说明                  | 建议提供 | 组件用途、不适用场景、业务特定语义                               |
+| 资源                 | 获取方式                             | 是否必需 | 用途                                                             |
+| -------------------- | ------------------------------------ | -------- | ---------------------------------------------------------------- |
+| **API 契约模板**     | 飞书 Wiki URL                        | ✅       | 章节结构、表格列定义（**不要擅自改格式！**）                     |
+| **CSS Token 映射表** | 飞书 Wiki URL                        | ✅       | Token 名称 ↔ HEX/OKLCH 值的**唯一真值来源**（R2）                |
+| **参考库设计**       | AntD / Base UI / MUI / shadcn 等 URL | 建议提供 | 设计模式选型（variant 枚举、size 阶梯、loading/color prop 形态） |
+| **需求描述**         | 用户口头/文字说明                    | 建议提供 | 组件用途、不适用场景、业务特定语义                               |
 
 **默认不读取项目组件源码**——契约先于代码，源码只是实现，不是规格来源。
 
@@ -116,13 +116,13 @@ description: 'Design and author component API contracts for UI components (Feish
 
 ### 1. 组件属于哪类？
 
-| 类型         | 特征             | 典型组件                              | 参考库                                 |
-| ------------ | ---------------- | ------------------------------------- | -------------------------------------- |
-| 原子交互元素 | 单一动作触发     | Button、Checkbox、Radio、Switch       | AntD Button、Radix Primitive           |
-| 输入框类     | 表单数据接收     | Input、Select、Textarea、DatePicker   | AntD Form、Radix Select                |
-| 反馈/通知类  | 信息展示         | Alert、Toast、Message、Tooltip        | AntD Feedback、Sonner                  |
-| 容器类       | 包裹内容管理状态 | Dialog、DropdownMenu、Tabs、Accordion | AntD Feedback/DataEntry、Radix Overlay |
-| 数据展示类   | 列表/表格/卡片   | Table、List、Card、Timeline           | AntD DataDisplay                       |
+| 类型         | 特征             | 典型组件                              | 参考库                                   |
+| ------------ | ---------------- | ------------------------------------- | ---------------------------------------- |
+| 原子交互元素 | 单一动作触发     | Button、Checkbox、Radio、Switch       | AntD Button、Base UI                     |
+| 输入框类     | 表单数据接收     | Input、Select、Textarea、DatePicker   | AntD Form、Base UI Select                |
+| 反馈/通知类  | 信息展示         | Alert、Toast、Message、Tooltip        | AntD Feedback、Sonner                    |
+| 容器类       | 包裹内容管理状态 | Dialog、DropdownMenu、Tabs、Accordion | AntD Feedback/DataEntry、Base UI Overlay |
+| 数据展示类   | 列表/表格/卡片   | Table、List、Card、Timeline           | AntD DataDisplay                         |
 
 ### 2. 有没有"三层优先级链"？
 
@@ -164,12 +164,12 @@ description: 'Design and author component API contracts for UI components (Feish
 
 ### 6. 参考库选择哪些？
 
-| 参考库         | 适合                                             |
-| -------------- | ------------------------------------------------ |
-| **Ant Design** | 完整 API 设计、loading、color prop、受控/非受控  |
-| **Radix UI**   | Primitive 设计、语义化 a11y、组合式 API          |
-| **shadcn/ui**  | CVA variants、Tailwind-first、无 forwardRef 模式 |
-| **MUI**        | variant / color / size 三元组设计                |
+| 参考库         | 适合                                                        |
+| -------------- | ----------------------------------------------------------- |
+| **Ant Design** | 完整 API 设计、loading、color prop、受控/非受控             |
+| **Base UI**    | Primitive 设计、语义化 a11y、render prop + slots 组合式 API |
+| **shadcn/ui**  | CVA variants、Tailwind-first、无 forwardRef 模式            |
+| **MUI**        | variant / color / size 三元组设计                           |
 
 ---
 
@@ -217,7 +217,7 @@ Props 表列顺序（从模板继承，**不要改**）：
 
 | 情况                    | 写法                   | 示例                                        |
 | ----------------------- | ---------------------- | ------------------------------------------- |
-| prop 有独立硬编码默认值 | `"值"` 或 `boolean`    | `asChild: false`、`loading: false`          |
+| prop 有独立硬编码默认值 | `"值"` 或 `boolean`    | `loading: false`、`disabled: false`         |
 | prop 依赖其他 prop 继承 | `undefined` + 说明文本 | `variant: undefined 未传入时由 preset 决定` |
 | prop 是纯占位符         | `—` 或 `undefined`     | `icon: —`                                   |
 
@@ -248,7 +248,7 @@ Props 表列顺序（从模板继承，**不要改**）：
 4. 跨 preset 等价规则：variant + color 显式组合 ≡ 某个 preset
 5. 常用组合示例：列出 2-3 个典型跨 preset 用法
 6. 状态叠加规则：prop + disabled / loading / aria-invalid 的叠加行为
-7. 警告类规则：有风险的边界条件（如 asChild 非原生元素需额外处理）
+7. 警告类规则：有风险的边界条件（如 render prop / slots 自定义非原生元素需额外处理 ref 与事件透传）
 ```
 
 **每条规则必须附示例**（`preset="X" + variant="Y" → 视觉描述`）。
@@ -352,7 +352,7 @@ for token, expected_oklch in token_truth.items():
 | -------- | -------------------------------------------------- |
 | 组件     | Button（原子交互元素）                             |
 | 类型归类 | 原子交互元素                                       |
-| 参考库   | AntD Button 5.x、Radix Primitive、shadcn/ui        |
+| 参考库   | AntD Button 5.x、Base UI、shadcn/ui                |
 | 设计模式 | 形状/颜色分离 + preset 推荐组合 + 纯展示无内部状态 |
 
 ### 设计决策点产出
