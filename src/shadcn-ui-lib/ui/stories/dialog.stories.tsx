@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, screen, userEvent, within } from 'storybook/test';
 import {
   Dialog,
   DialogClose,
@@ -42,6 +43,15 @@ export const Default: Story = {
       </DialogContent>
     </Dialog>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Radix Dialog portals its content to document.body, so the open dialog is
+    // queried from `screen` rather than the canvas root.
+    await userEvent.click(canvas.getByRole('button', { name: /open dialog/i }));
+    const dialog = await screen.findByRole('dialog');
+    await expect(dialog).toBeInTheDocument();
+    await expect(within(dialog).getByText(/are you sure\?/i)).toBeInTheDocument();
+  },
 };
 
 export const WithoutCloseButton: Story = {
@@ -53,9 +63,7 @@ export const WithoutCloseButton: Story = {
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>No close button</DialogTitle>
-          <DialogDescription>
-            Use the Cancel button below to dismiss.
-          </DialogDescription>
+          <DialogDescription>Use the Cancel button below to dismiss.</DialogDescription>
         </DialogHeader>
         <DialogFooter showCloseButton>
           <Button>OK</Button>
