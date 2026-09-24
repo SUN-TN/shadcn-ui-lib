@@ -1,7 +1,8 @@
 # [组件名] 组件 API 契约
 
-> 编写规范见 `component-api-contract` skill。
+> 编写规范见 `feishu-component-api` skill。
 > 所有涉及 CSS Token 映射的表格须含三列：`figma 变量名` / `tailwind 工具类` / `对应的 css 值`（真值源：CSS Token 映射表 V1，离线见 `references/token-v1.md`）。
+> 契约阶段必须产出「可拆分复用工具」清单（工具名 / 形态 / 说明 / 复用范围）。本模板若不允许增章节（铁律 1），则写入项目的组件范围 / MVP 清单，并在「变更记录」留一条指向；无候选时写「无」。
 
 ## 概述
 

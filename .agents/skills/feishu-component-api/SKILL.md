@@ -75,6 +75,8 @@ description: 'Design and author component API contracts for UI components (Feish
 8. **默认不读源码**——设计模式下只从模板、Token 表、参考库、用户需求提取信息。反推模式必须用户显式指定
 9. **Token 映射表最少两列**——凡涉及 CSS Token 映射的表格，优先含 `figma 变量名` / `tailwind 工具类` / `对应的 css 值` 三列（css 值以 oklch 优先，可附 hex）。若某 tailwind 工具类（如 `px-[6px]` 这类任意值）在 token 映射表中找不到对应 figma 变量，则至少须含 `tailwind 工具类` 与 `对应的 css 值` 两列
 10. **间距/圆角必须落标准档**——间距仅 2/4/8/12/16/24…（无 6px 等非标）；圆角 `--radius`≈10px，sm/md/lg/xl = 4/6/8/12px；颜色用语义 token。非标值须在 figma 列显式标注
+11. **契约必须产出「可拆分复用工具」清单**——设计任何组件契约时，都要显式判断该组件是否含可跨组件复用的模块（浏览器 API 封装 / 纯函数校验 / 数据模型与状态机 / 副作用 Hook / 通用交互 Hook / 对外契约类型）；有则逐项列出（工具名 / 形态 / 说明 / 复用范围），确实没有也要写明「无」。清单是契约阶段的**必需产出**，不是可选附录（详见设计决策点 7 / R7）
+12. **设计与回写分离，决策先问用户**——设计阶段只产出**本地**文档（如 `xxx-contract-design.md`），**用户明确要求前不回写飞书**；需拍板的设计点必须先在文档 / 回复中给出「区别 / 优点 / 缺点 / 推荐方案 / 推荐理由」，再用 `AskUserQuestion` 收口，不替用户硬定。控件保持纯净，错误态 / 表单校验 / label 组合等能力优先走契约外机制，不在组件内引入 `*Field` 包装（详见 `references/feishu-writeback-sop.md` Part A）
 
 ---
 
@@ -99,7 +101,8 @@ description: 'Design and author component API contracts for UI components (Feish
 - **R3 落标准 token**：间距档位仅 2/4/8/12/16/24…（无 6px 等非标）；圆角 `--radius`≈10px，sm/md/lg/xl = 4/6/8/12px；颜色用 V1 主色 / 危险 / 成功等语义 token。
 - **R4 不一致先给方案**：发现三列不对应，先列出不一致项并给出「以哪个值为准」的若干方案，让用户决策后再改另外两个值。
 - **R5 Markdown 风格**：沿用 `Markdown 实用手册.md`（`#` 顶级 + `###` 子章节、列表项间空行、代码块标注语言、引用块提示、FAQ + 总结）。
-- **R6 契约章节结构**：建议含 概述 / Props(API) 表 / 状态与变体 / 尺寸表(三列) / 样式映射表(三列) / 可访问性 / 使用示例 / FAQ / 变更记录。
+- **R6 契约章节结构**：建议含 概述 / Props(API) 表 / 状态与变体 / 尺寸表(三列) / 样式映射表(三列) / 可访问性 / 使用示例 / FAQ / 变更记录。这是**建议基线**；含事件 / Slots / Ref / 组合规则 / 响应式 / 附录的**完整章节清单**见 `references/feishu-writeback-sop.md` A.1。
+- **R7 必产「可拆分复用工具」清单**：设计契约时必须显式判断组件是否含可跨组件复用的模块（浏览器 API 封装 / 纯函数校验 / 数据模型与状态机 / 副作用 Hook / 通用交互 Hook / 对外契约类型）；有则逐项列出 `工具名 / 形态 / 说明 / 复用范围`，无则写「无」。「复用范围」列（`全库通用` / `本组件专用`）是后续「是否独立成 registry 条目」的判据——全库通用独立成条，组件专用随组件内联分发。详见设计决策点 7。
 
 ### 标准 Token 速查
 
@@ -171,6 +174,33 @@ description: 'Design and author component API contracts for UI components (Feish
 | **shadcn/ui**  | CVA variants、Tailwind-first、无 forwardRef 模式            |
 | **MUI**        | variant / color / size 三元组设计                           |
 
+### 7. 有没有可拆分为通用复用工具的模块？
+
+**组件契约不只描述「这个组件怎么用」，还要识别「哪些能力不该被这个组件私有」。** 凡是与 UI 渲染解耦、可被其他组件复用的逻辑，都应在契约阶段提取出来并列表。
+
+判定标准（满足任一条即候选）：
+
+| 信号                             | 例子（来自 Upload 契约）                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 纯浏览器 API 封装、零 React 依赖 | `xhrUpload`（原生 XHR + 进度 / 取消）、`readFileAs`、`downloadFile`、`getImageDimensions`           |
+| 纯函数解析 / 校验                | `parseAccept` / `matchAccept`、`validateMaxSize`、`validateMaxCount`                                |
+| 数据模型归一化 + 状态机          | `createUploadFile`（File → 组件模型）、`fileStatusReducer`（selected→uploading→done/error→removed） |
+| 副作用 / 生命周期 Hook           | `useObjectUrl`（objectURL 自动回收）、`useDropZone`（dragleave 抖动抑制）、`useFileInput`           |
+| 通用交互 / a11y Hook             | `usePrefersReducedMotion`、`useKeyActivation`                                                       |
+| 对外契约类型                     | `UploadRequestOption`、`UploadRequestReturn`（`customRequest` 无类型不可用）                        |
+| 无状态工具函数                   | `genUid`、`buildFormData`                                                                           |
+
+**产出要求**：
+
+1. 列出 `工具名 / 形态（纯函数 / Hook / 类型契约）/ 说明 / 复用范围` 四列。
+2. **「复用范围」是必需列**——取值 `全库通用` 或 `本组件专用`；它是后续「是否独立成 registry 条目」的判据（全库通用 → 独立成条；组件专用 → 随组件内联分发）。
+3. 判为「本组件专用」的也要列出并标注——不要因为「不外发」就省略；出现第二个消费者时可直接升级。
+4. 无候选工具时写「本节无（原因：…）」，不留空节、不省略该节。
+
+**产出位置**：优先作为契约文档的一节（放在 Props 之后）；若上游模板不允许增章节（铁律 1），则写入项目的组件范围 / MVP 清单（如《组件库范围与 MVP 清单》§4.7 工具与资源），并在契约文档的「变更记录」留一条指向。
+
+> 参考案例：Upload 契约经此步骤提取出 **25 项**候选工具（全库通用 18 / 组件专用 7），最终落地为 5 个 registry 条目（`file-utils` / `upload-transport` / `file-hooks` / `a11y-hooks` / `common-utils`）。
+
 ---
 
 ## 标准流程（设计模式，7 阶段 + 2 检查点）
@@ -195,7 +225,7 @@ lark-cli docs +fetch --doc "<TokenURL>" --detail with-ids --as user
 
 ### 阶段 2：设计决策（填表格之前）
 
-**根据上面的 6 个决策点，产出设计草案**：
+**根据上面的 7 个决策点，产出设计草案**：
 
 1. 组件类型归类 → 决定哪些章节是重点
 2. 画出完整优先级链（如果需要三层决策）
@@ -203,8 +233,9 @@ lark-cli docs +fetch --doc "<TokenURL>" --detail with-ids --as user
 4. 确定 loading / disabled 设计 → 决定 loading icon prop 是否需要
 5. 确定 size 枚举粒度
 6. 确定参考库 → 决定命名风格和设计模式
+7. 识别可拆分为通用复用工具的模块 → 产出「可拆分复用工具」清单（铁律 11 / R7）
 
-**产出形式**：5-8 行文字描述 + 1 个场景推导表（用于验证设计自洽性）。
+**产出形式**：5-8 行文字描述 + 1 个场景推导表（用于验证设计自洽性）+ 1 张可拆分复用工具清单表（工具名 / 形态 / 说明 / 复用范围；无候选时写「无」）。
 
 ### 阶段 3：填充 Props 表
 
@@ -287,6 +318,8 @@ lark-cli docs +fetch --doc "<URL>" --detail with-ids --as user
 # 确认 revision 递增 + block-id 变化
 ```
 
+> **覆盖式回写（整篇替换）与 `<tag>` 剥离坑**见 `references/feishu-writeback-sop.md` Part B：命令形态、裸文本 `\<x\>` / 反引号内去反引号 / 占位符改 `{}` / 代码块不动的转义对照表、以及「`warnings` 不穷尽，必须 `fetch --format pretty` 回读」的核验清单。
+
 **常见错误**：
 
 - ❌ callout + table 作为一个整体做 `block_replace`（飞书把它们当独立 block）
@@ -338,6 +371,7 @@ for token, expected_oklch in token_truth.items():
 - [ ] 优先级链在设计决策阶段已画清，组合规则里明确写出
 - [ ] 边界条件（如仅 variant 显式 + color 隐式）在组合规则里有独立规则 + 示例
 - [ ] 使用示例按递进层次组织，覆盖所有主要组合
+- [ ] **已产出「可拆分复用工具」清单（工具名 / 形态 / 说明 / 复用范围）；无候选时已写明「无」**（铁律 11 / R7）
 - [ ] 文档写入后 fetch 确认 revision 递增 + block-id 变化
 
 ---
@@ -429,5 +463,6 @@ for token, expected_oklch in token_truth.items():
 
 - `references/token-v1.md`：飞书《CSS Token 映射表 V1》离线快照（figma / tailwind / css 三列），离线可用；以 `src/global.css` 为最终权威，V2 发布或改 token 时更新。
 - `references/contract-template.md`：组件契约 Markdown 本地模板（含三列尺寸表 / 样式映射表骨架），用于新建本地契约文档。
+- `references/feishu-writeback-sop.md`：飞书回写 SOP（命令形态 / `<tag>` 剥离坑与转义对照表 / 回读核验清单）＋ 原 `feishu-design-contract` skill 并入的设计方法论补充（完整章节骨架 A.1 / 视觉表标准列 / 决策先问用户 / 控件边界 / 流程纪律）。**2026-09-24 起本 skill 为该领域唯一正本，本地 `feishu-design-contract` 已废弃。**
 - 飞书《CSS Token 映射表 V1》在线真值源（设计模式下通过 `lark-cli docs +fetch` 获取最新）。
 - 项目 `src/global.css`：本项目色彩/间距/圆角 token 的唯一真源（见 AGENTS.md）。
