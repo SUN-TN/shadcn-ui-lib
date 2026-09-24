@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "common-utils",
+  "type": "registry:lib",
+  "author": "SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)",
+  "title": "Common Utils",
+  "description": "通用工具（零依赖）：genUid —— 稳定唯一标识，secure context 下用 crypto.randomUUID 并内置回退。",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "common-utils.ts",
+      "target": "@lib/shadcn-ui-lib/common-utils.ts",
+      "content": "/**\n * 通用工具（零依赖）\n *\n * ⚠️ PLACEHOLDER：本文件当前为「模块骨架」——导出签名已定稿，函数体待实现。\n * 仅用于跑通 registry 生成管线（见 tool-registry-plan-draft.md §8.1）。\n */\n\nconst notImplemented = (fn: string): never => {\n  throw new Error(`${fn}：占位实现，尚未落地（见 tool-registry-plan-draft.md §8.1）`);\n};\n\n/** 稳定唯一标识：secure context 用 crypto.randomUUID，否则内置回退。 */\nexport function genUid(): string {\n  return notImplemented('genUid()');\n}\n",
+      "type": "registry:lib"
+    }
+  ],
+  "categories": [
+    "utils"
+  ],
+  "docs": "https://github.com/SUN-TN/shadcn-ui-lib"
+}

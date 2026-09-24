@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "upload-transport",
+  "type": "registry:lib",
+  "author": "SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)",
+  "title": "Upload Transport",
+  "description": "原生 XHR 的 multipart/form-data 上传器与进度归一化，含 customRequest 契约类型（UploadRequestOption / UploadRequestReturn）。",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "upload-transport.ts",
+      "target": "@lib/shadcn-ui-lib/upload-transport.ts",
+      "content": "/**\n * 上传传输层（原生 XHR，零依赖）\n *\n * ⚠️ PLACEHOLDER：本文件当前为「模块骨架」——契约类型已定稿，函数体待实现。\n * 仅用于跑通 registry 生成管线（见 tool-registry-plan-draft.md §8.1）。\n * 契约见《组件 API 契约：Upload》§12（上传策略与 customRequest 契约）。\n */\n\n/** customRequest 统一入参契约。 */\nexport interface UploadRequestOption {\n  file: File | Blob;\n  action?: string;\n  headers?: Record<string, string>;\n  data?: Record<string, unknown>;\n  name?: string;\n  method?: string;\n  withCredentials?: boolean;\n  onProgress: (event: { percent: number }) => void;\n  onSuccess: (body: unknown, xhr?: XMLHttpRequest) => void;\n  onError: (error: Error, xhr?: XMLHttpRequest) => void;\n}\n\n/** customRequest 返回值：可返回 abort 句柄以支持取消。 */\nexport type UploadRequestReturn = { abort?: () => void } | void;\n\nconst notImplemented = (fn: string): never => {\n  throw new Error(`${fn}：占位实现，尚未落地（见 tool-registry-plan-draft.md §8.1）`);\n};\n\n/** XHR ProgressEvent → 0–100；lengthComputable 为 false 时降级。 */\nexport function toUploadPercent(event: ProgressEvent): number {\n  return notImplemented(`toUploadPercent(${event.type})`);\n}\n\n/** 原生 XHR multipart/form-data 上传器，返回 abort 句柄。 */\nexport function xhrUpload(option: UploadRequestOption): UploadRequestReturn {\n  return notImplemented(`xhrUpload(${option.action ?? 'no-action'})`);\n}\n",
+      "type": "registry:lib"
+    }
+  ],
+  "categories": [
+    "utils"
+  ],
+  "docs": "https://github.com/SUN-TN/shadcn-ui-lib"
+}

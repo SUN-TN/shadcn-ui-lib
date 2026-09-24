@@ -59,6 +59,14 @@ const items = itemFiles.map((file) => {
 });
 
 const uiItems = items.filter((x) => x.item.type === 'registry:ui');
+
+// 工具条目：files[].target 落在 @lib/shadcn-ui-lib/ 或 @hooks/shadcn-ui-lib/ 下
+// （与 utils「@lib/utils.ts」、theme-provider「@components/theme/...」区分开）
+const TOOL_TARGET_PREFIXES = ['@lib/shadcn-ui-lib/', '@hooks/shadcn-ui-lib/'];
+const isToolItem = (item: RegistryItem): boolean =>
+  (item.files ?? []).some((f) => TOOL_TARGET_PREFIXES.some((p) => f.target.startsWith(p)));
+const toolItems = items.filter((x) => isToolItem(x.item));
+
 const deps = (item: RegistryItem): string[] => item.registryDependencies ?? [];
 const npmDeps = (item: RegistryItem): string[] => item.dependencies ?? [];
 const devDeps = (item: RegistryItem): string[] => item.devDependencies ?? [];
@@ -172,6 +180,54 @@ describe('registry 分发契约', () => {
       expect(typeof item.title, `${name} 缺 title`).toBe('string');
       expect((item.title ?? '').length, `${name} 的 title 为空`).toBeGreaterThan(0);
       expect((item.description ?? '').length, `${name} 的 description 为空`).toBeGreaterThan(0);
+    }
+  });
+
+  it('A12 · 工具条目的 type 与落点前缀一致，且落在 shadcn-ui-lib/ 子目录', () => {
+    expect(toolItems.length).toBeGreaterThan(0);
+    for (const { name, item } of toolItems) {
+      for (const file of item.files ?? []) {
+        expect(file.path, `${name} 的 files[].path 不应含子路径`).not.toContain('/');
+        expect(file.type, `${name} 的 files[].type 应与条目 type 一致`).toBe(item.type);
+        if (item.type === 'registry:lib') {
+          expect(file.target, `${name} 应落在 @lib/shadcn-ui-lib/`).toMatch(
+            /^@lib\/shadcn-ui-lib\/.+\.ts$/,
+          );
+        } else if (item.type === 'registry:hook') {
+          expect(file.target, `${name} 应落在 @hooks/shadcn-ui-lib/`).toMatch(
+            /^@hooks\/shadcn-ui-lib\/.+\.ts$/,
+          );
+        } else {
+          throw new Error(`${name} 的工具条目 type 只能是 registry:lib / registry:hook`);
+        }
+      }
+    }
+  });
+
+  it('A13 · 工具条目不自动带装 utils / theme / theme-dark（与 UI 组件区分）', () => {
+    for (const { name, item } of toolItems) {
+      for (const forbidden of ['utils', 'theme', 'theme-dark']) {
+        expect(deps(item).includes(ITEM_URL(forbidden)), `${name} 不该自动带装 ${forbidden}`).toBe(
+          false,
+        );
+      }
+    }
+  });
+
+  it('A14 · 工具条目零新增 npm 依赖（落实「原生优先」决策）', () => {
+    for (const { name, item } of toolItems) {
+      expect(npmDeps(item), `${name} 应为零依赖，实际：${npmDeps(item).join(', ')}`).toHaveLength(
+        0,
+      );
+      expect(devDeps(item), `${name} 不应声明 devDependencies`).toHaveLength(0);
+    }
+  });
+
+  it('A15 · 工具条目 files[].path 不得是测试文件', () => {
+    for (const { name, item } of toolItems) {
+      for (const file of item.files ?? []) {
+        expect(file.path, `${name} 误把测试文件当条目源`).not.toContain('.test.');
+      }
     }
   });
 });

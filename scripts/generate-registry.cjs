@@ -111,6 +111,92 @@ const componentNames = fs
   .filter((f) => f.endsWith('.tsx'))
   .map((f) => f.replace('.tsx', ''));
 
+// ---- 工具注册表项（lib / hook，跨组件复用）----
+// 配置驱动：新增工具只需在此登记，无需再写一段硬编码。
+// 规划依据见 tool-registry-plan-draft.md（§4.7 复用范围 → 是否独立成条）。
+// 注意：这些条目均为「原生实现、零 npm 依赖」，因此 registryDependencies 通常为空。
+const TOOL_ITEMS = [
+  {
+    name: 'file-utils',
+    type: 'registry:lib',
+    sourcePath: path.join(ROOT, 'src/lib/shadcn-ui-lib/file-utils.ts'),
+    target: '@lib/shadcn-ui-lib/file-utils.ts',
+    title: 'File Utils',
+    description:
+      '文件工具集（零依赖）：accept 解析与匹配、体积 / 数量校验、图片尺寸探测、FileReader 封装、下载、multipart 表单体构造、拖入文件提取。',
+    categories: ['utils'],
+  },
+  {
+    name: 'upload-transport',
+    type: 'registry:lib',
+    sourcePath: path.join(ROOT, 'src/lib/shadcn-ui-lib/upload-transport.ts'),
+    target: '@lib/shadcn-ui-lib/upload-transport.ts',
+    title: 'Upload Transport',
+    description:
+      '原生 XHR 的 multipart/form-data 上传器与进度归一化，含 customRequest 契约类型（UploadRequestOption / UploadRequestReturn）。',
+    categories: ['utils'],
+  },
+  {
+    name: 'file-hooks',
+    type: 'registry:hook',
+    sourcePath: path.join(ROOT, 'src/hooks/shadcn-ui-lib/file-hooks.ts'),
+    target: '@hooks/shadcn-ui-lib/file-hooks.ts',
+    title: 'File Hooks',
+    description:
+      '文件相关 React hooks：预览 URL 生命周期管理（useObjectUrl）、隐藏 file input 控制（useFileInput）、拖拽区编排（useDropZone）。',
+    categories: ['hooks'],
+  },
+  {
+    name: 'a11y-hooks',
+    type: 'registry:hook',
+    sourcePath: path.join(ROOT, 'src/hooks/shadcn-ui-lib/a11y-hooks.ts'),
+    target: '@hooks/shadcn-ui-lib/a11y-hooks.ts',
+    title: 'A11y Hooks',
+    description:
+      '可访问性 hooks：prefers-reduced-motion 检测（usePrefersReducedMotion）与 Enter/Space 键盘激活（useKeyActivation）。',
+    categories: ['hooks'],
+  },
+  {
+    name: 'common-utils',
+    type: 'registry:lib',
+    sourcePath: path.join(ROOT, 'src/lib/shadcn-ui-lib/common-utils.ts'),
+    target: '@lib/shadcn-ui-lib/common-utils.ts',
+    title: 'Common Utils',
+    description:
+      '通用工具（零依赖）：genUid —— 稳定唯一标识，secure context 下用 crypto.randomUUID 并内置回退。',
+    categories: ['utils'],
+  },
+];
+
+// 内部条目名集合（UI 组件 + 工具条目），用于把 @/ 内部 import 映射成绝对 URL
+const knownItemNames = new Set([...componentNames, ...TOOL_ITEMS.map((t) => t.name)]);
+
+// @/ 内部别名前缀 → 对应条目所在目录
+const INTERNAL_ALIAS_PREFIXES = [
+  '@/shadcn-ui-lib/ui/',
+  '@/components/ui/',
+  '@/lib/shadcn-ui-lib/',
+  '@/hooks/shadcn-ui-lib/',
+];
+
+/**
+ * 扫描源码里的 @/ 内部 import，映射为同仓库条目的绝对 URL。
+ * 裸名会被 CLI 解析成官方 @shadcn 的同名条目，因此必须写绝对地址。
+ */
+function internalDeps(content, selfName) {
+  const out = new Set();
+  for (const m of content.matchAll(/from\s+['"](@\/[^'"]+)['"]/g)) {
+    const spec = m[1];
+    const prefix = INTERNAL_ALIAS_PREFIXES.find((p) => spec.startsWith(p));
+    if (!prefix) continue;
+    const dep = spec.slice(prefix.length).replace(/\.tsx?$/, '');
+    if (!dep || dep === selfName) continue;
+    if (!knownItemNames.has(dep)) continue;
+    out.add(ITEM_URL(dep));
+  }
+  return [...out];
+}
+
 function extractNpmDeps(content) {
   const deps = new Set();
   for (const match of content.matchAll(BARE_IMPORT_RE)) {
@@ -134,16 +220,7 @@ function extractNpmDeps(content) {
 const depMap = {};
 for (const name of componentNames) {
   const content = fs.readFileSync(path.join(srcDir, `${name}.tsx`), 'utf8');
-  const deps = new Set();
-  for (const m of content.matchAll(/from\s+['"](@\/[^'"]+)['"]/g)) {
-    const dep = m[1]
-      .replace('@/shadcn-ui-lib/ui/', '')
-      .replace('@/components/ui/', '');
-    if (dep && dep !== name && componentNames.includes(dep)) {
-      // 同仓库内部依赖必须写绝对地址：裸名会被 CLI 解析成官方 @shadcn 的同名组件
-      deps.add(ITEM_URL(dep));
-    }
-  }
+  const deps = new Set(internalDeps(content, name));
   // 所有 UI 组件都依赖 utils（本项目自带，声明 cn 依赖）
   deps.add(ITEM_URL('utils'));
   // 所有 UI 组件都自动带装色彩 token，保证业务项目装上就设计规范生效
@@ -188,6 +265,45 @@ for (const name of componentNames) {
     `✓ ${name}.json  (deps: ${item.dependencies.join(', ') || 'none'}` +
       `${devDependencies.length ? `; devDeps: ${devDependencies.join(', ')}` : ''}` +
       `; registryDeps: ${item.registryDependencies.length})`
+  );
+}
+
+// ---- 工具注册表项（lib / hook，配置驱动）----
+for (const tool of TOOL_ITEMS) {
+  const fileName = path.basename(tool.sourcePath);
+  if (fileName.includes('.test.')) {
+    throw new Error(`工具条目 ${tool.name} 的源文件疑似测试文件：${fileName}`);
+  }
+  if (!fs.existsSync(tool.sourcePath)) {
+    throw new Error(`工具条目 ${tool.name} 的源文件不存在：${tool.sourcePath}`);
+  }
+
+  const content = fs.readFileSync(tool.sourcePath, 'utf8');
+  const item = {
+    $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+    name: tool.name,
+    type: tool.type,
+    author: AUTHOR,
+    title: tool.title,
+    description: tool.description,
+    dependencies: extractNpmDeps(content),
+    registryDependencies: internalDeps(content, tool.name),
+    files: [
+      {
+        path: fileName,
+        target: tool.target,
+        content,
+        type: tool.type,
+      },
+    ],
+    categories: tool.categories,
+    docs: DOCS_URL,
+  };
+
+  fs.writeFileSync(path.join(outDir, `${tool.name}.json`), JSON.stringify(item, null, 2));
+  items.push({ name: tool.name, title: tool.title, description: tool.description });
+  console.log(
+    `✓ ${tool.name}.json  (type: ${tool.type}; deps: ${item.dependencies.join(', ') || 'none'}; registryDeps: ${item.registryDependencies.length})`
   );
 }
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "file-hooks",
+  "type": "registry:hook",
+  "author": "SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)",
+  "title": "File Hooks",
+  "description": "文件相关 React hooks：预览 URL 生命周期管理（useObjectUrl）、隐藏 file input 控制（useFileInput）、拖拽区编排（useDropZone）。",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "file-hooks.ts",
+      "target": "@hooks/shadcn-ui-lib/file-hooks.ts",
+      "content": "/**\n * 文件相关 React hooks（零依赖）\n *\n * ⚠️ PLACEHOLDER：本文件当前为「模块骨架」——导出签名与类型已定稿，函数体待实现。\n * 仅用于跑通 registry 生成管线（见 tool-registry-plan-draft.md §8.1）。\n * 契约见《组件 API 契约：Upload》§6（Ref 方法）/ §9（可访问性）。\n */\nimport type { RefObject } from 'react';\n\n/** useFileInput 入参。 */\nexport interface FileInputOptions {\n  accept?: string;\n  multiple?: boolean;\n  disabled?: boolean;\n}\n\n/** useFileInput 返回：隐藏 input 的 ref 与命令式打开方法。 */\nexport interface FileInputController {\n  inputRef: RefObject<HTMLInputElement | null>;\n  openFileDialog: () => void;\n}\n\n/** useDropZone 入参。 */\nexport interface DropZoneOptions {\n  onFiles: (files: File[]) => void;\n  disabled?: boolean;\n}\n\n/** useDropZone 返回：悬停态与可直接展开到容器上的事件处理器。 */\nexport interface DropZoneController {\n  isDragOver: boolean;\n  dropZoneProps: {\n    onDragEnter: (event: DragEvent) => void;\n    onDragOver: (event: DragEvent) => void;\n    onDragLeave: (event: DragEvent) => void;\n    onDrop: (event: DragEvent) => void;\n  };\n}\n\nconst notImplemented = (fn: string): never => {\n  throw new Error(`${fn}：占位实现，尚未落地（见 tool-registry-plan-draft.md §8.1）`);\n};\n\n/** 预览 URL 生成与自动回收，规避 URL.createObjectURL 的内存泄漏。 */\nexport function useObjectUrl(file: Blob | null | undefined): string | undefined {\n  return notImplemented(`useObjectUrl(${file ? 'blob' : 'null'})`);\n}\n\n/** 隐藏 input[type=file] 的控制与属性透传。 */\nexport function useFileInput(options: FileInputOptions = {}): FileInputController {\n  return notImplemented(`useFileInput(${options.accept ?? 'any'})`);\n}\n\n/** 拖拽区事件编排（含 dragover 阻止默认与 dragleave 抖动抑制）。 */\nexport function useDropZone(options: DropZoneOptions): DropZoneController {\n  return notImplemented(`useDropZone(${options.disabled ? 'disabled' : 'enabled'})`);\n}\n",
+      "type": "registry:hook"
+    }
+  ],
+  "categories": [
+    "hooks"
+  ],
+  "docs": "https://github.com/SUN-TN/shadcn-ui-lib"
+}

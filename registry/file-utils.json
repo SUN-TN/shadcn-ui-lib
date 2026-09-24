@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "file-utils",
+  "type": "registry:lib",
+  "author": "SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)",
+  "title": "File Utils",
+  "description": "文件工具集（零依赖）：accept 解析与匹配、体积 / 数量校验、图片尺寸探测、FileReader 封装、下载、multipart 表单体构造、拖入文件提取。",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "file-utils.ts",
+      "target": "@lib/shadcn-ui-lib/file-utils.ts",
+      "content": "/**\n * 文件工具集（零依赖）\n *\n * ⚠️ PLACEHOLDER：本文件当前为「模块骨架」——导出签名与类型已定稿，函数体待实现。\n * 仅用于跑通 registry 生成管线（见 tool-registry-plan-draft.md §8.1）。\n * 行为契约见《组件 API 契约：Upload》§13（校验与限制策略）。\n */\n\n/** 文件校验结果：ok 为 false 时附带可直接展示的文案。 */\nexport type FileValidationResult = { ok: true } | { ok: false; message: string };\n\nconst notImplemented = (fn: string): never => {\n  throw new Error(`${fn}：占位实现，尚未落地（见 tool-registry-plan-draft.md §8.1）`);\n};\n\n/** 解析 accept 字符串（MIME 通配 + 扩展名）为规则列表。 */\nexport function parseAccept(accept: string): string[] {\n  return notImplemented(`parseAccept(${accept})`);\n}\n\n/** 判断文件是否匹配 accept 规则；文件选择与拖入二次校验共用。 */\nexport function matchAccept(file: File, accept: string): boolean {\n  return notImplemented(`matchAccept(${file.name}, ${accept})`);\n}\n\n/** 体积校验：超过 maxSize（字节）时返回失败与文案。 */\nexport function validateMaxSize(file: File, maxSize?: number): FileValidationResult {\n  return notImplemented(`validateMaxSize(${file.name}, ${String(maxSize)})`);\n}\n\n/** 数量校验：超过 maxCount 时返回失败与文案。 */\nexport function validateMaxCount(count: number, maxCount?: number): FileValidationResult {\n  return notImplemented(`validateMaxCount(${count}, ${String(maxCount)})`);\n}\n\n/** 探测图片尺寸（优先 createImageBitmap，回退 Image + objectURL）。 */\nexport function getImageDimensions(file: File): Promise<{ width: number; height: number }> {\n  return notImplemented(`getImageDimensions(${file.name})`);\n}\n\n/** FileReader 封装：按需读取为 dataURL / text / arrayBuffer。 */\nexport function readFileAs(file: File, as: 'dataURL'): Promise<string>;\nexport function readFileAs(file: File, as: 'text'): Promise<string>;\nexport function readFileAs(file: File, as: 'arrayBuffer'): Promise<ArrayBuffer>;\nexport function readFileAs(\n  file: File,\n  as: 'dataURL' | 'text' | 'arrayBuffer',\n): Promise<string | ArrayBuffer> {\n  return notImplemented(`readFileAs(${file.name}, ${as})`);\n}\n\n/** 触发浏览器下载。 */\nexport function downloadFile(url: string, filename?: string): void {\n  notImplemented(`downloadFile(${url}, ${String(filename)})`);\n}\n\n/** 构造 multipart 表单体（字段名默认 file，附加业务字段一并写入）。 */\nexport function buildFormData(\n  file: Blob,\n  data?: Record<string, unknown>,\n  name = 'file',\n): FormData {\n  return notImplemented(`buildFormData(${name}, ${String(Object.keys(data ?? {}).length)} fields)`);\n}\n\n/** 从 DataTransfer 提取文件列表（过滤目录项）。 */\nexport function extractDroppedFiles(dataTransfer: DataTransfer | null): File[] {\n  return notImplemented(`extractDroppedFiles(${dataTransfer ? 'DataTransfer' : 'null'})`);\n}\n",
+      "type": "registry:lib"
+    }
+  ],
+  "categories": [
+    "utils"
+  ],
+  "docs": "https://github.com/SUN-TN/shadcn-ui-lib"
+}

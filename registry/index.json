@@ -29,6 +29,31 @@
       "description": "A native HTML input element, styled with Tailwind CSS."
     },
     {
+      "name": "file-utils",
+      "title": "File Utils",
+      "description": "文件工具集（零依赖）：accept 解析与匹配、体积 / 数量校验、图片尺寸探测、FileReader 封装、下载、multipart 表单体构造、拖入文件提取。"
+    },
+    {
+      "name": "upload-transport",
+      "title": "Upload Transport",
+      "description": "原生 XHR 的 multipart/form-data 上传器与进度归一化，含 customRequest 契约类型（UploadRequestOption / UploadRequestReturn）。"
+    },
+    {
+      "name": "file-hooks",
+      "title": "File Hooks",
+      "description": "文件相关 React hooks：预览 URL 生命周期管理（useObjectUrl）、隐藏 file input 控制（useFileInput）、拖拽区编排（useDropZone）。"
+    },
+    {
+      "name": "a11y-hooks",
+      "title": "A11y Hooks",
+      "description": "可访问性 hooks：prefers-reduced-motion 检测（usePrefersReducedMotion）与 Enter/Space 键盘激活（useKeyActivation）。"
+    },
+    {
+      "name": "common-utils",
+      "title": "Common Utils",
+      "description": "通用工具（零依赖）：genUid —— 稳定唯一标识，secure context 下用 crypto.randomUUID 并内置回退。"
+    },
+    {
       "name": "theme-dark",
       "title": "Dark Baseline",
       "description": "中性暗色基线（.dark 变量）。设计规范只定义亮色，本项按需单独安装。"

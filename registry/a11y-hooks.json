@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "a11y-hooks",
+  "type": "registry:hook",
+  "author": "SUN-TN (https://github.com/SUN-TN/shadcn-ui-lib)",
+  "title": "A11y Hooks",
+  "description": "可访问性 hooks：prefers-reduced-motion 检测（usePrefersReducedMotion）与 Enter/Space 键盘激活（useKeyActivation）。",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "a11y-hooks.ts",
+      "target": "@hooks/shadcn-ui-lib/a11y-hooks.ts",
+      "content": "/**\n * 可访问性 hooks（零依赖）\n *\n * ⚠️ PLACEHOLDER：本文件当前为「模块骨架」——导出签名已定稿，函数体待实现。\n * 仅用于跑通 registry 生成管线（见 tool-registry-plan-draft.md §8.1）。\n * 契约见《组件 API 契约：Upload》§9（可访问性）。\n */\nimport type { KeyboardEvent } from 'react';\n\n/** useKeyActivation 返回：可直接展开到触发元素上的键盘处理器。 */\nexport interface KeyActivationHandlers {\n  onKeyDown: (event: KeyboardEvent) => void;\n}\n\nconst notImplemented = (fn: string): never => {\n  throw new Error(`${fn}：占位实现，尚未落地（见 tool-registry-plan-draft.md §8.1）`);\n};\n\n/** 检测 prefers-reduced-motion（SSR 安全，默认 false）。 */\nexport function usePrefersReducedMotion(): boolean {\n  return notImplemented('usePrefersReducedMotion()');\n}\n\n/** Enter / Space 键盘激活（用于非按钮触发区，如 dropzone）。 */\nexport function useKeyActivation(onActivate: () => void): KeyActivationHandlers {\n  return notImplemented(`useKeyActivation(${onActivate.name || 'anonymous'})`);\n}\n",
+      "type": "registry:hook"
+    }
+  ],
+  "categories": [
+    "hooks"
+  ],
+  "docs": "https://github.com/SUN-TN/shadcn-ui-lib"
+}
