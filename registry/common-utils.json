@@ -11,7 +11,7 @@
     {
       "path": "common-utils.ts",
       "target": "@lib/shadcn-ui-lib/common-utils.ts",
-      "content": "/**\n * 通用工具（零依赖）\n *\n * ⚠️ PLACEHOLDER：本文件当前为「模块骨架」——导出签名已定稿，函数体待实现。\n * 仅用于跑通 registry 生成管线（见 tool-registry-plan-draft.md §8.1）。\n */\n\nconst notImplemented = (fn: string): never => {\n  throw new Error(`${fn}：占位实现，尚未落地（见 tool-registry-plan-draft.md §8.1）`);\n};\n\n/** 稳定唯一标识：secure context 用 crypto.randomUUID，否则内置回退。 */\nexport function genUid(): string {\n  return notImplemented('genUid()');\n}\n",
+      "content": "/**\n * 通用工具（零依赖）\n *\n * 复用范围：全库通用——任何需要稳定 key / 列表项 id 的组件都可复用。\n */\n\nlet uidCounter = 0;\n\n/**\n * 唯一标识：secure context（https / localhost）用 `crypto.randomUUID`，\n * 否则走内置回退（时间戳 + 自增序号 + 随机串）。\n *\n * 回退是必需的：`crypto.randomUUID` 只在 secure context 暴露，\n * 内网 http 部署下直接调用会抛 `TypeError`。\n * 该标识用于 React key / 列表项 id，不用于安全用途。\n */\nexport function genUid(): string {\n  if (typeof globalThis.crypto?.randomUUID === 'function') {\n    return globalThis.crypto.randomUUID();\n  }\n\n  uidCounter += 1;\n  const time = Date.now().toString(36);\n  const seq = uidCounter.toString(36);\n  // 随机段只负责打散，唯一性由「毫秒时间戳 + 自增序号」保证；\n  // padEnd 是为了在 Math.random() 恰好给出短小数时保持格式稳定。\n  const random = Math.random().toString(36).slice(2, 10).padEnd(8, '0');\n  return `uid-${time}-${seq}-${random}`;\n}\n",
       "type": "registry:lib"
     }
   ],
