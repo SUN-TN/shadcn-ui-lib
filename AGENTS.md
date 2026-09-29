@@ -72,7 +72,7 @@ scripts/generate-registry.cjs
 
 | 层         | 工具                                                                    | 用途                                                                 | 入口                  |
 | ---------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------- |
-| 契约       | `scripts/__tests__/registry-contract.test.ts`（Vitest node project）    | 验证 `generate-registry.cjs` 产出符合分发契约（A1–A11 共 11 条断言） | `pnpm test`           |
+| 契约       | `scripts/__tests__/registry-contract.test.ts`（Vitest node project）    | 验证 `generate-registry.cjs` 产出符合分发契约（A1–A16 共 16 条断言） | `pnpm test`           |
 | 组件行为   | `src/**/*.test.{ts,tsx}`（Vitest jsdom project + RTL）                  | 验证组件 props/状态/事件透传                                         | `pnpm test`           |
 | Story 交互 | `src/**/*.stories.tsx` 的 `play` 函数（Vitest browser mode + Chromium） | 端到端模拟用户操作并断言                                             | `pnpm test-storybook` |
 
