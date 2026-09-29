@@ -230,4 +230,24 @@ describe('registry 分发契约', () => {
       }
     }
   });
+
+  // 《组件通用规范》§2「表单依赖边界」/ §9.4：只有字段集成层允许依赖 @tanstack/react-form
+  const FORM_INTEGRATION_WHITELIST = new Set([
+    'form-context',
+    'app-form',
+    'form-hook',
+    'form-error-summary',
+  ]);
+  const isFormIntegrationItem = (name: string): boolean =>
+    /-field$/.test(name) || FORM_INTEGRATION_WHITELIST.has(name);
+
+  it('A16 · 非表单集成层条目不得依赖 @tanstack/react-form', () => {
+    for (const { name, item } of items) {
+      if (isFormIntegrationItem(name)) continue;
+      expect(
+        npmDeps(item).includes('@tanstack/react-form'),
+        `${name} 不是字段集成层条目，不该声明 @tanstack/react-form（§2 表单依赖边界）`,
+      ).toBe(false);
+    }
+  });
 });
